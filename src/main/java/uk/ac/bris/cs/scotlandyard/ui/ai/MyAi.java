@@ -38,9 +38,12 @@ public class MyAi implements Ai {
             @Nonnull Board board,
             Pair<Long, TimeUnit> timeoutPair) {
         Board.GameState gameState = boardToGameState(board);
+        root = new GameTreeNode(gameState);
+        root.computeNextLevel();
 
         // returns a random move, replace with your own implementation
         var moves = board.getAvailableMoves().asList();
+        System.out.println(moves.size());
         return moves.get(new Random().nextInt(moves.size()));
     }
 
