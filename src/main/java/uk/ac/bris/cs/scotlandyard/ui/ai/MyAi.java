@@ -1,16 +1,12 @@
 package uk.ac.bris.cs.scotlandyard.ui.ai;
 
-import java.util.*;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Interner;
 import io.atlassian.fugue.Pair;
-import org.commonmark.internal.IndentedCodeBlockParser;
 import uk.ac.bris.cs.scotlandyard.model.*;
-import uk.ac.bris.cs.scotlandyard.ui.model.Setup;
 
 public class MyAi implements Ai {
 
@@ -41,7 +37,7 @@ public class MyAi implements Ai {
 
         int MrXLocation = board.getAvailableMoves().stream().findFirst().get().source();
         root = new GameTreeNode(gameState, null, MrXLocation);
-        root.computeNextLevel(10);
+        root.computeLevels(3, 10);
         root = root.bestNode();
         return root.getMove();
     }

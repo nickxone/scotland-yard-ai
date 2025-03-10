@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.graph.ImmutableValueGraph;
 import javafx.util.Pair;
+import org.glassfish.grizzly.asyncqueue.AsyncQueueIO;
 import uk.ac.bris.cs.scotlandyard.model.*;
 
 import java.util.ArrayList;
@@ -38,7 +39,23 @@ public class GameTreeNode {
         return bestNode;
     }
 
-    public void computeNextLevel(int maxNodes) {
+    public void computeLevels(int levels, int maxNodes) {
+        if (levels <= 0) return;
+
+        if (this.move == null || this.move.commencedBy().isDetective()) { // MrX's turn is next
+            computeMrXLevel(maxNodes);
+        } else { // Detectives' turn is next
+            computeDetectivesLevel(maxNodes);
+        }
+
+        if (childNodes != null) {
+            for (GameTreeNode childNode : childNodes) {
+                childNode.computeLevels(levels - 1, maxNodes);
+            }
+        }
+    }
+
+    private void computeMrXLevel(int maxNodes) {
         List<GameTreeNode> possibleChildNodes = new ArrayList<>();
         for (Move move : gameState.getAvailableMoves()) {
             int newMrXLocation;
@@ -54,9 +71,28 @@ public class GameTreeNode {
                 .collect(Collectors.toList());
     }
 
-    private int computeScore() { // score current node (board state, i.e. this.gameState)
-        ImmutableValueGraph<Integer, ImmutableSet<ScotlandYard.Transport>> graph = gameState.getSetup().graph;
+    private void computeDetectivesLevel(int maxNodes) {
+        List<GameTreeNode> possibleChildNodes = new ArrayList<>();
+        List<GameTreeNode> possibleStates = gameState.getAvailableMoves().stream()
+                .map(state -> new GameTreeNode(gameState.advance(state), state, MrXLocation))
+                .sorted((a, b) -> Integer.compare(b.score, a.score))
+                .collect(Collectors.toList());
+        while (possibleChildNodes.size() < maxNodes) {
+            Board.GameState newGameState = gameState;
+            for (int i = 0; i < gameState.getWinner().size() - 1; i++) { // iterate the number of detectives times
+                newGameState.advance(possibleStates.get(possibleStates.size() - 1).move); // detectives want to minimise MrX score
+                possibleStates.remove(possibleStates.size() - 1);
+            }
+            Move detectivesMove = possibleStates.get(0).move; // the move doesn't matter as long as it was made by detectives
+            possibleChildNodes.add(new GameTreeNode(newGameState, detectivesMove, MrXLocation));
+        }
+        childNodes = possibleChildNodes;
+    }
 
+    private int computeScore() { // score current node (board state, i.e. this.gameState)
+        if (!gameState.getWinner().isEmpty()) return 0; // detectives has won, therefore minimum score
+
+        ImmutableValueGraph<Integer, ImmutableSet<ScotlandYard.Transport>> graph = gameState.getSetup().graph;
 //        run Dijkstra algorithm for the current position of MrX, then check distances to detectives
         int[] distances = computeDistance(graph, this.MrXLocation);
         ImmutableList<Integer> detectives = gameState.getPlayers().stream()
@@ -80,9 +116,9 @@ public class GameTreeNode {
         while (!pq.isEmpty()) {
             int vertex = pq.poll().getKey();
             for (Integer e : graph.adjacentNodes(vertex)) {
-                // TODO: possibly calculate distance based on weighting tickets
                 ImmutableSet<ScotlandYard.Transport> transports = graph.edgeValue(vertex, e).get();
-                for (ScotlandYard.Transport transport : transports) {
+
+                for (ScotlandYard.Transport transport : transports) {  // Calculate distance based on weighting tickets
                     int distance = 0;
                     switch (transport) {
                         case TAXI -> distance = 1;
@@ -95,6 +131,7 @@ public class GameTreeNode {
                         pq.add(new Pair<>(e, distTo[e]));
                     }
                 }
+
             }
         }
 
