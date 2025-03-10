@@ -10,15 +10,14 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
+import java.util.stream.Collectors;
 
 public class GameTreeNode {
-    //    Current's node value
     private Board.GameState gameState;
     private Move move;
     private int MrXLocation;
     private int score;
 
-    //    Children of the current node
     private List<GameTreeNode> childNodes;
 
     GameTreeNode(Board.GameState gameState, Move move, int MrXLocation) {
@@ -26,11 +25,9 @@ public class GameTreeNode {
         this.move = move;
         this.MrXLocation = MrXLocation;
         this.score = computeScore();
-        this.childNodes = new ArrayList<GameTreeNode>();
-        System.out.println(MrXLocation);
     }
 
-    public Move bestMove() {
+    public GameTreeNode bestNode() {
 //        TODO: implement MinMax algorithm
         GameTreeNode bestNode = childNodes.get(0);
         for (GameTreeNode childNode : childNodes) {
@@ -38,17 +35,23 @@ public class GameTreeNode {
                 bestNode = childNode;
             }
         }
-        return bestNode.move;
+        return bestNode;
     }
 
-    public void computeNextLevel() {
+    public void computeNextLevel(int maxNodes) {
+        List<GameTreeNode> possibleChildNodes = new ArrayList<>();
         for (Move move : gameState.getAvailableMoves()) {
             int newMrXLocation;
             if (move instanceof Move.DoubleMove) newMrXLocation = ((Move.DoubleMove) move).destination2;
             else newMrXLocation = ((Move.SingleMove) move).destination;
             GameTreeNode childNode = new GameTreeNode(gameState.advance(move), move, newMrXLocation);
-            childNodes.add(childNode);
+            possibleChildNodes.add(childNode);
         }
+        // Select up to `maxNodes` best nodes for efficiency (Alpha–beta pruning)
+        childNodes = possibleChildNodes.stream()
+                .sorted((a, b) -> Integer.compare(b.score, a.score)) // sort in descending order (the higher score, the better)
+                .limit(maxNodes)
+                .collect(Collectors.toList());
     }
 
     private int computeScore() { // score current node (board state, i.e. this.gameState)
@@ -96,6 +99,10 @@ public class GameTreeNode {
         }
 
         return distTo;
+    }
+
+    public Move getMove() {
+        return move;
     }
 
 }

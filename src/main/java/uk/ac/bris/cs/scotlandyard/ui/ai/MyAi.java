@@ -38,14 +38,15 @@ public class MyAi implements Ai {
             @Nonnull Board board,
             Pair<Long, TimeUnit> timeoutPair) {
         Board.GameState gameState = boardToGameState(board);
+
         int MrXLocation = board.getAvailableMoves().stream().findFirst().get().source();
         root = new GameTreeNode(gameState, null, MrXLocation);
-        root.computeNextLevel();
-
-        return root.bestMove();
+        root.computeNextLevel(10);
+        root = root.bestNode();
+        return root.getMove();
     }
 
-//    Functions related to type conversion from `Board` to `Board.GameState`
+    //    Functions related to type conversion from `Board` to `Board.GameState`
     private ImmutableMap<ScotlandYard.Ticket, Integer> getTickets(Board board, Piece piece) {
         Board.TicketBoard ticketBoard = board.getPlayerTickets(piece).get();
         return ImmutableMap.of(
