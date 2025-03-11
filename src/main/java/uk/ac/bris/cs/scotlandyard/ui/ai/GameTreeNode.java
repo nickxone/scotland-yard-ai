@@ -74,14 +74,21 @@ public class GameTreeNode {
     private void computeDetectivesLevel(int maxNodes) {
         List<GameTreeNode> possibleChildNodes = new ArrayList<>();
         List<GameTreeNode> possibleStates = gameState.getAvailableMoves().stream()
-                .map(state -> new GameTreeNode(gameState.advance(state), state, MrXLocation))
+                .map(move -> new GameTreeNode(gameState.advance(move), move, MrXLocation))
                 .sorted((a, b) -> Integer.compare(b.score, a.score))
                 .collect(Collectors.toList());
         while (possibleChildNodes.size() < maxNodes) {
+            // advance the `newGameState` the number of detectives times
             Board.GameState newGameState = gameState;
-            for (int i = 0; i < gameState.getWinner().size() - 1; i++) { // iterate the number of detectives times
-                newGameState.advance(possibleStates.get(possibleStates.size() - 1).move); // detectives want to minimise MrX score
-                possibleStates.remove(possibleStates.size() - 1);
+            newGameState = newGameState.advance(possibleStates.get(possibleStates.size() - 1).move);
+            possibleStates.remove(possibleStates.size() - 1);
+
+            for (int i = 0; i < newGameState.getPlayers().size() - 2; i++) {
+                Board.GameState finalNewGameState = newGameState;
+                GameTreeNode currentBestNode = newGameState.getAvailableMoves().stream()
+                        .map(move -> new GameTreeNode(finalNewGameState.advance(move), move, MrXLocation))
+                        .min(Comparator.comparingInt(GameTreeNode::computeScore)).get();
+                newGameState = newGameState.advance(currentBestNode.move);
             }
             Move detectivesMove = possibleStates.get(0).move; // the move doesn't matter as long as it was made by detectives
             possibleChildNodes.add(new GameTreeNode(newGameState, detectivesMove, MrXLocation));
