@@ -9,10 +9,7 @@ import uk.ac.bris.cs.scotlandyard.model.*;
 import uk.ac.bris.cs.scotlandyard.ui.ai.GraphHelper.GraphHelper;
 import uk.ac.bris.cs.scotlandyard.ui.ai.GraphHelper.WeightedGraphHelper;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.PriorityQueue;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class GameTreeNode {
@@ -28,17 +25,38 @@ public class GameTreeNode {
         this.move = move;
         this.MrXLocation = MrXLocation;
         this.score = computeScore();
+        this.childNodes = new ArrayList<>();
     }
 
     public GameTreeNode bestNode() {
-//        TODO: implement MinMax algorithm
-        GameTreeNode bestNode = childNodes.get(0);
-        for (GameTreeNode childNode : childNodes) {
-            if (childNode.score > bestNode.score) {
-                bestNode = childNode;
+        return minimax(this);
+    }
+
+    private GameTreeNode minimax(GameTreeNode node) { // implements MiniMax algorithm
+        if (node.childNodes.isEmpty()) return node; // edge case
+
+        GameTreeNode bestNode = null;
+        if (node.move == null || node.move.commencedBy().isDetective()) { // Maximising
+            int bestScore = Integer.MIN_VALUE;
+            for (GameTreeNode child : node.childNodes) {
+                GameTreeNode evaluatedNode = minimax(child);
+                if (evaluatedNode.score > bestScore) {
+                    bestScore = evaluatedNode.score;
+                    bestNode = child;
+                }
+            }
+        } else { // Minimising
+            int bestScore = Integer.MAX_VALUE;
+            for (GameTreeNode child : node.childNodes) {
+                GameTreeNode evaluatedNode = minimax(child);
+                if (evaluatedNode.score < bestScore) {
+                    bestScore = evaluatedNode.score;
+                    bestNode = child;
+                }
             }
         }
-        return bestNode;
+
+        return bestNode; // Return the best move found
     }
 
     public void computeLevels(int levels, int maxNodes) {
@@ -87,10 +105,11 @@ public class GameTreeNode {
 
             for (int i = 0; i < newGameState.getPlayers().size() - 2; i++) {
                 Board.GameState finalNewGameState = newGameState;
-                GameTreeNode currentBestNode = newGameState.getAvailableMoves().stream()
+                Optional<GameTreeNode> currentBestNode = newGameState.getAvailableMoves().stream()
                         .map(move -> new GameTreeNode(finalNewGameState.advance(move), move, MrXLocation))
-                        .min(Comparator.comparingInt(GameTreeNode::computeScore)).get();
-                newGameState = newGameState.advance(currentBestNode.move);
+                        .min(Comparator.comparingInt(GameTreeNode::computeScore));
+                if (currentBestNode.isEmpty()) break;
+                newGameState = newGameState.advance(currentBestNode.get().move);
             }
             Move detectivesMove = possibleStates.get(0).move; // the move doesn't matter as long as it was made by detectives
             possibleChildNodes.add(new GameTreeNode(newGameState, detectivesMove, MrXLocation));
