@@ -3,8 +3,6 @@ package uk.ac.bris.cs.scotlandyard.ui.ai;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.graph.ImmutableValueGraph;
-import javafx.util.Pair;
-import org.glassfish.grizzly.asyncqueue.AsyncQueueIO;
 import uk.ac.bris.cs.scotlandyard.model.*;
 import uk.ac.bris.cs.scotlandyard.ui.ai.GraphHelper.GraphHelper;
 import uk.ac.bris.cs.scotlandyard.ui.ai.GraphHelper.WeightedGraphHelper;
@@ -35,28 +33,24 @@ public class GameTreeNode {
     private GameTreeNode minimax(GameTreeNode node) { // implements MiniMax algorithm
         if (node.childNodes.isEmpty()) return node; // edge case
 
-        GameTreeNode bestNode = null;
-        if (node.move == null || node.move.commencedBy().isDetective()) { // Maximising
-            int bestScore = Integer.MIN_VALUE;
+        GameTreeNode bestNode = node.childNodes.get(0);
+        if (node.move == null || node.move.commencedBy().isDetective()) { // Maximising (Mr.X move)
             for (GameTreeNode child : node.childNodes) {
-                GameTreeNode evaluatedNode = minimax(child);
-                if (evaluatedNode.score > bestScore) {
-                    bestScore = evaluatedNode.score;
+                GameTreeNode subNode = minimax(child);
+                if (subNode.score > bestNode.score) {
                     bestNode = child;
                 }
             }
-        } else { // Minimising
-            int bestScore = Integer.MAX_VALUE;
-            for (GameTreeNode child : node.childNodes) {
-                GameTreeNode evaluatedNode = minimax(child);
-                if (evaluatedNode.score < bestScore) {
-                    bestScore = evaluatedNode.score;
+        } else {
+            for (GameTreeNode child : node.childNodes) { // Minimising (Detectives move)
+                GameTreeNode subNode = minimax(child);
+                if (subNode.score < bestNode.score) {
                     bestNode = child;
                 }
             }
         }
 
-        return bestNode; // Return the best move found
+        return bestNode;
     }
 
     public void computeLevels(int levels, int maxNodes) {
@@ -118,11 +112,13 @@ public class GameTreeNode {
     }
 
     private int computeScore() { // score current node (board state, i.e. this.gameState)
+//        TODO: consider how many tickets Mr.X has got left after the move (which ones he used), and how many available moves it has after the move
         if (!gameState.getWinner().isEmpty()) return 0; // detectives has won, therefore minimum score
 
         ImmutableValueGraph<Integer, ImmutableSet<ScotlandYard.Transport>> graph = gameState.getSetup().graph;
         // check distances to detectives
         GraphHelper graphHelper = new WeightedGraphHelper();
+//        GraphHelper graphHelper = new RegularGraphHelper();
         int[] distances = graphHelper.computeDistance(graph, MrXLocation);
         ImmutableList<Integer> detectives = gameState.getPlayers().stream()
                 .filter(player -> !player.isMrX())
