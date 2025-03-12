@@ -1,4 +1,4 @@
-package uk.ac.bris.cs.scotlandyard.ui.ai;
+package uk.ac.bris.cs.scotlandyard.ui.ai.GameTreeAI;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
