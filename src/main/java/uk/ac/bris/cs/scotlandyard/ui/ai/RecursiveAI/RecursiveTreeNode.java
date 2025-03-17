@@ -1,8 +1,15 @@
 package uk.ac.bris.cs.scotlandyard.ui.ai.RecursiveAI;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.graph.ImmutableValueGraph;
 import uk.ac.bris.cs.scotlandyard.model.Board;
 import uk.ac.bris.cs.scotlandyard.model.Move;
+import uk.ac.bris.cs.scotlandyard.model.Piece;
+import uk.ac.bris.cs.scotlandyard.model.ScotlandYard;
 import uk.ac.bris.cs.scotlandyard.ui.ai.GameTreeAI.GameTreeNode;
+import uk.ac.bris.cs.scotlandyard.ui.ai.GraphHelper.GraphHelper;
+import uk.ac.bris.cs.scotlandyard.ui.ai.GraphHelper.WeightedGraphHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,10 +86,23 @@ public class RecursiveTreeNode {
         return childNodes;
     }
 
-    private int computeScore(Board.GameState gameState) {
-        if (!gameState.getWinner().isEmpty()) return -1;
-        return 0;
+    private int computeScore(Board.GameState currentState) { // score current node (board state, i.e. this.gameState)
+//        TODO: consider how many tickets Mr.X has got left after the move (which ones he used), and how many available moves it has after the move
+        if (!currentState.getWinner().isEmpty()) return -1; // detectives has won, therefore minimum score
+
+        ImmutableValueGraph<Integer, ImmutableSet<ScotlandYard.Transport>> graph = currentState.getSetup().graph;
+        // check distances to detectives
+        GraphHelper graphHelper = new WeightedGraphHelper();
+//        GraphHelper graphHelper = new RegularGraphHelper();
+        int[] distances = graphHelper.computeDistance(graph, MrXLocation);
+        ImmutableList<Integer> detectives = currentState.getPlayers().stream()
+                .filter(player -> !player.isMrX())
+                .map(player -> currentState.getDetectiveLocation((Piece.Detective) player).get())
+                .collect(ImmutableList.toImmutableList());
+
+        return detectives.stream().map(location -> distances[location]).mapToInt(Integer::intValue).sum();
     }
+
 
     public Move getMove() {
         return move;

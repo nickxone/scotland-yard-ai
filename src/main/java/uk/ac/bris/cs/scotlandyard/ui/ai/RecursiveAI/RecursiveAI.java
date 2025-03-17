@@ -24,7 +24,7 @@ public class RecursiveAI  implements Ai {
 
         int MrXLocation = board.getAvailableMoves().stream().findFirst().get().source();
         RecursiveTreeNode root = new RecursiveTreeNode(gameState, null, MrXLocation);
-        return root.minimax(root, 8, Integer.MIN_VALUE, Integer.MAX_VALUE, true, 6).getMove();
+        return root.minimax(root, 6, Integer.MIN_VALUE, Integer.MAX_VALUE, true, 6).getMove();
     }
 
 }
