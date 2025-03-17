@@ -11,8 +11,6 @@ import uk.ac.bris.cs.scotlandyard.ui.ai.GameStateFactory;
 
 public class GameTreeAI implements Ai {
 
-    private GameTreeNode root;
-
     @Nonnull
     @Override
     public String name() {
@@ -38,7 +36,7 @@ public class GameTreeAI implements Ai {
         Board.GameState gameState = gameStateFactory.getNewGameState(board);
 
         int MrXLocation = board.getAvailableMoves().stream().findFirst().get().source();
-        root = new GameTreeNode(gameState, null, MrXLocation);
+        GameTreeNode root = new GameTreeNode(gameState, null, MrXLocation);
         root.computeLevels(4, 6);
         root = root.bestNode();
         return root.getMove();

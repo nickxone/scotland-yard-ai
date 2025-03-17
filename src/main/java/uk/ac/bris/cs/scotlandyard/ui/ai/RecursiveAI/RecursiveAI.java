@@ -20,7 +20,11 @@ public class RecursiveAI  implements Ai {
     @Override
     public Move pickMove(@Nonnull Board board, Pair<Long, TimeUnit> timeoutPair) {
         GameStateFactory gameStateFactory = new GameStateFactory();
-        return null;
+        Board.GameState gameState = gameStateFactory.getNewGameState(board);
+
+        int MrXLocation = board.getAvailableMoves().stream().findFirst().get().source();
+        RecursiveTreeNode root = new RecursiveTreeNode(gameState, null, MrXLocation);
+        return root.minimax(root, 8, Integer.MIN_VALUE, Integer.MAX_VALUE, true, 6).getMove();
     }
 
 }

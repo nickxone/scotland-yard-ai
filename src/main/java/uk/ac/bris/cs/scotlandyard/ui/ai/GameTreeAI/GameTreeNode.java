@@ -78,7 +78,6 @@ public class GameTreeNode {
             GameTreeNode childNode = new GameTreeNode(gameState.advance(move), move, newMrXLocation);
             possibleChildNodes.add(childNode);
         }
-        // Select up to `maxNodes` best nodes for efficiency (Alpha–beta pruning)
         childNodes = possibleChildNodes.stream()
                 .sorted((a, b) -> Integer.compare(b.score, a.score)) // sort in descending order (the higher score, the better)
                 .limit(maxNodes)
