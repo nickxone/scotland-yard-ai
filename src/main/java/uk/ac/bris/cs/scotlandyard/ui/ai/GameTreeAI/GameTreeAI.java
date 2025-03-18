@@ -37,7 +37,7 @@ public class GameTreeAI implements Ai {
 
         int MrXLocation = board.getAvailableMoves().stream().findFirst().get().source();
         GameTreeNode root = new GameTreeNode(gameState, null, MrXLocation);
-        root.computeLevels(4, 6);
+        root.computeLevels(4, 4);
         root = root.bestNode();
         return root.getMove();
     }

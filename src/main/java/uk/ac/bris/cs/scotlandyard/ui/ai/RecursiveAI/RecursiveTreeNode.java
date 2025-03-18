@@ -1,5 +1,6 @@
 package uk.ac.bris.cs.scotlandyard.ui.ai.RecursiveAI;
 
+import com.esotericsoftware.kryo.util.Null;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.graph.ImmutableValueGraph;
@@ -7,7 +8,6 @@ import uk.ac.bris.cs.scotlandyard.model.Board;
 import uk.ac.bris.cs.scotlandyard.model.Move;
 import uk.ac.bris.cs.scotlandyard.model.Piece;
 import uk.ac.bris.cs.scotlandyard.model.ScotlandYard;
-import uk.ac.bris.cs.scotlandyard.ui.ai.GameTreeAI.GameTreeNode;
 import uk.ac.bris.cs.scotlandyard.ui.ai.GraphHelper.GraphHelper;
 import uk.ac.bris.cs.scotlandyard.ui.ai.GraphHelper.WeightedGraphHelper;
 
@@ -31,7 +31,7 @@ public class RecursiveTreeNode {
 
         List<RecursiveTreeNode> childNodes = maximisingPlayer ? computeMrXNodes(maxNodes) : computeDetectivesNodes(maxNodes);
 
-        if (maximisingPlayer) { // Mr. X want to maximise the score
+        if (maximisingPlayer) { // Mr. X wants to maximise the score
             RecursiveTreeNode maxNode = childNodes.get(0);
             for (RecursiveTreeNode childNode : childNodes) {
                 RecursiveTreeNode evaluatedNode = childNode.minimax(depth - 1, alpha, beta, false, maxNodes);
@@ -73,28 +73,35 @@ public class RecursiveTreeNode {
 
     private List<RecursiveTreeNode> computeDetectivesNodes(int maxNodes) {
         List<Move> possibleMoves = new ArrayList<>(gameState.getAvailableMoves().stream()
-                .sorted((a, b) -> Integer.compare(computeScore(gameState.advance(a)), computeScore(gameState.advance(b))))
-                .toList()); // contains possible moves in ascending order based on the corresponding score
+                .sorted((a, b) -> Integer.compare(computeScore(gameState.advance(b)), computeScore(gameState.advance(a))))
+                .toList()); // Sort available moves in descending order of computed score (worse moves last)
 
         List<RecursiveTreeNode> childNodes = new ArrayList<>();
-        while (childNodes.size() < maxNodes) {
-            Board.GameState newGameState = gameState.advance(possibleMoves.get(possibleMoves.size() - 1));
-            possibleMoves.remove(possibleMoves.size() - 1);
-            for (int i = 0; i < gameState.getPlayers().size() - 2; ++i) { // repeat for the number of detectives times - 1
-                Board.GameState finalNewGameState = newGameState;
-                Move bestMove = newGameState.getAvailableMoves().stream()
-                        .max((a, b) -> Integer.compare(computeScore(finalNewGameState.advance(a)), computeScore(finalNewGameState.advance(b))))
-                        .get();
+
+        while (!possibleMoves.isEmpty() && childNodes.size() < maxNodes) {
+            // Get and remove the worst-scoring move (last in sorted list)
+            Board.GameState newGameState = gameState;
+            Move bestMove = possibleMoves.remove(possibleMoves.size() - 1);
+
+            while (bestMove != null) { // while detectives can move
                 newGameState = newGameState.advance(bestMove);
+                Board.GameState finalNewGameState = newGameState;
+                bestMove = newGameState.getAvailableMoves().stream()
+                        .min((a, b) -> Integer.compare(computeScore(finalNewGameState.advance(a)), computeScore(finalNewGameState.advance(b))))
+                        .orElse(null);
             }
-            childNodes.add(new RecursiveTreeNode(newGameState, possibleMoves.get(0), MrXLocation));
+
+            childNodes.add(new RecursiveTreeNode(newGameState, move, MrXLocation));
         }
 
         return childNodes;
     }
 
+
     private int computeScore(Board.GameState currentGameState) { // score current node (board state, i.e. this.gameState)
 //        TODO: consider how many tickets Mr.X has got left after the move (which ones he used), and how many available moves it has after the move
+//        TODO: if the current location of Mr.X is visible for detectives, encourage the use of secret ticket
+
         if (!currentGameState.getWinner().isEmpty()) return -1; // detectives has won, therefore minimum score
 
         ImmutableValueGraph<Integer, ImmutableSet<ScotlandYard.Transport>> graph = currentGameState.getSetup().graph;
