@@ -28,11 +28,16 @@ public class RecursiveTreeNode {
     }
 
     public RecursiveTreeNode minimax(int depth, int alpha, int beta, boolean maximisingPlayer, int maxNodes) {
-        if (depth == 0 || this.score < -100) {
-            return this;
+        System.out.println("Depth " + depth);
+        if (depth == 0 || !gameState.getWinner().isEmpty()) {
+            return this; // end of the tree, or there is a winner
         }
 
         List<RecursiveTreeNode> childNodes = maximisingPlayer ? computeMrXNodes(maxNodes) : computeDetectivesNodes(maxNodes);
+        if (childNodes.isEmpty()) {
+            System.out.println("No child nodes found");
+            return this;
+        }
 
         if (maximisingPlayer) { // Mr. X wants to maximise the score
             int maxEval = Integer.MIN_VALUE;
@@ -93,7 +98,7 @@ public class RecursiveTreeNode {
             Board.GameState newGameState = gameState;
             Move bestMove = possibleMoves.remove(possibleMoves.size() - 1);
 
-            while (bestMove != null) { // while detectives can move
+            while (bestMove != null && !bestMove.commencedBy().isDetective()) { // while detectives can move
                 newGameState = newGameState.advance(bestMove);
                 Board.GameState finalNewGameState = newGameState;
                 bestMove = newGameState.getAvailableMoves().stream()
