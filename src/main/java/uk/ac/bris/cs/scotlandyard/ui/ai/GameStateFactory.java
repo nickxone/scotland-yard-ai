@@ -16,9 +16,9 @@ public class GameStateFactory {
         );
     }
 
-    public Board.GameState getNewGameState(Board board) {
+    public Board.GameState getNewGameState(Board board, int location) {
         Piece mrXPiece = board.getPlayers().stream().filter(player -> player.isMrX()).findFirst().get();
-        int location = board.getAvailableMoves().stream().findFirst().get().source();
+//        int location = board.getAvailableMoves().stream().findFirst().get().source();
         ImmutableMap<ScotlandYard.Ticket, Integer> mrXTickets = getTickets(board, mrXPiece);
 
         ImmutableList<Player> detectives = board.getPlayers().stream()

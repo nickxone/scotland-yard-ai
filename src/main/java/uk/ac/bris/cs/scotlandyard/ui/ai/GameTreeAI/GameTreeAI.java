@@ -32,12 +32,13 @@ public class GameTreeAI implements Ai {
     public Move pickMove(
             @Nonnull Board board,
             Pair<Long, TimeUnit> timeoutPair) {
-        GameStateFactory gameStateFactory = new GameStateFactory();
-        Board.GameState gameState = gameStateFactory.getNewGameState(board);
-
         int MrXLocation = board.getAvailableMoves().stream().findFirst().get().source();
+
+        GameStateFactory gameStateFactory = new GameStateFactory();
+        Board.GameState gameState = gameStateFactory.getNewGameState(board, MrXLocation);
+
         GameTreeNode root = new GameTreeNode(gameState, null, MrXLocation);
-        root.computeLevels(4, 4);
+        root.computeLevels(3, 5);
         root = root.bestNode();
         return root.getMove();
     }

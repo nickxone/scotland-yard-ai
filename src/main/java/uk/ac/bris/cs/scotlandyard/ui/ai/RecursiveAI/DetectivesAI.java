@@ -9,23 +9,24 @@ import uk.ac.bris.cs.scotlandyard.ui.ai.GameStateFactory;
 import javax.annotation.Nonnull;
 import java.util.concurrent.TimeUnit;
 
-public class RecursiveAI  implements Ai {
+public class DetectivesAI implements Ai {
     @Nonnull
     @Override
     public String name() {
-        return "Recursive AI";
+        return "Detectives AI";
     }
 
     @Nonnull
     @Override
     public Move pickMove(@Nonnull Board board, Pair<Long, TimeUnit> timeoutPair) {
-        int MrXLocation = board.getAvailableMoves().stream().findFirst().get().source();
+        int MrXLocation;
+        MrXLocation = 114; // Central location of Mr.X
 
         GameStateFactory gameStateFactory = new GameStateFactory();
         Board.GameState gameState = gameStateFactory.getNewGameState(board, MrXLocation);
 
-        RecursiveTreeNode root = new RecursiveTreeNode(gameState, null, MrXLocation);
-        return root.minimax(3, Integer.MIN_VALUE, Integer.MAX_VALUE, true, 5).getMove();
+        DetectiveTreeNode root = new DetectiveTreeNode(gameState, null, MrXLocation);
+        Move bestMove = root.minimax(1, Integer.MIN_VALUE, Integer.MAX_VALUE, false, 5).getMove();
+        return bestMove;
     }
-
 }
