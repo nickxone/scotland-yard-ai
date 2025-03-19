@@ -92,14 +92,16 @@ public class DetectiveTreeNode {
             Board.GameState newGameState = gameState;
             List<Move> bestMoves = new ArrayList<>(List.of(possibleMoves.remove(possibleMoves.size() - 1)));
 
-            while (bestMoves.get(bestMoves.size() -1) != null && bestMoves.get(bestMoves.size() - 1).commencedBy().isDetective()) { // while detectives can move
+            while (bestMoves.get(bestMoves.size() - 1) != null && bestMoves.get(bestMoves.size() - 1).commencedBy().isDetective()) { // while detectives can move
                 newGameState = newGameState.advance(bestMoves.get(bestMoves.size() - 1));
                 Board.GameState finalNewGameState = newGameState;
                 bestMoves.add(newGameState.getAvailableMoves().stream()
                         .min((a, b) -> Integer.compare(computeScore(finalNewGameState.advance(a)), computeScore(finalNewGameState.advance(b))))
+                        .filter(move -> move.commencedBy().isDetective())
                         .orElse(null));
             }
 
+            bestMoves.remove(bestMoves.size() - 1);
             childNodes.add(new DetectiveTreeNode(newGameState, bestMoves, MrXLocation));
         }
 
