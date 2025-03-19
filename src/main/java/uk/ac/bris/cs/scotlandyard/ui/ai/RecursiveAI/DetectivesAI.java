@@ -37,7 +37,7 @@ public class DetectivesAI implements Ai {
             Board.GameState gameState = aiGameStateFactory.build(board, MrXLocation, true);
 
             DetectiveTreeNode root = new DetectiveTreeNode(gameState, null, MrXLocation);
-            moves = root.minimax(1, Integer.MIN_VALUE, Integer.MAX_VALUE, false, 1000).getMoves();
+            moves = root.minimax(1, Integer.MIN_VALUE, Integer.MAX_VALUE, false, 5).getMoves();
         }
         return moves.remove(moves.size() - 1);
     }

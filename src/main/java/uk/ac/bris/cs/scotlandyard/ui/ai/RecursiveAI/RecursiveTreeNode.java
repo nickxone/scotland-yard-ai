@@ -90,17 +90,17 @@ public class RecursiveTreeNode {
         while (!possibleMoves.isEmpty() && childNodes.size() < maxNodes) {
             // Get and remove the worst-scoring move (last in sorted list)
             Board.GameState newGameState = gameState;
-            Move bestMove = possibleMoves.remove(possibleMoves.size() - 1);
+            List<Move> bestMoves = new ArrayList<>(List.of(possibleMoves.remove(possibleMoves.size() - 1)));
 
-            while (bestMove != null && bestMove.commencedBy().isDetective()) { // while detectives can move
-                newGameState = newGameState.advance(bestMove);
+            while (bestMoves.get(bestMoves.size() - 1) != null && bestMoves.get(bestMoves.size() - 1).commencedBy().isDetective()) { // while detectives can move
+                newGameState = newGameState.advance(bestMoves.get(bestMoves.size() - 1));
                 Board.GameState finalNewGameState = newGameState;
-                bestMove = newGameState.getAvailableMoves().stream()
+                bestMoves.add(newGameState.getAvailableMoves().stream()
                         .min((a, b) -> Integer.compare(computeScore(finalNewGameState.advance(a)), computeScore(finalNewGameState.advance(b))))
-                        .orElse(null);
+                        .orElse(null));
             }
 
-            childNodes.add(new RecursiveTreeNode(newGameState, bestMove, MrXLocation));
+            childNodes.add(new RecursiveTreeNode(newGameState, bestMoves.get(0), MrXLocation));
         }
 
         return childNodes;

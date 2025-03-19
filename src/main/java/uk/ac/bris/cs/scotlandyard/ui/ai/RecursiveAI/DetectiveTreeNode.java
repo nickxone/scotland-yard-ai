@@ -90,7 +90,7 @@ public class DetectiveTreeNode {
         while (!possibleMoves.isEmpty() && childNodes.size() < maxNodes) {
             // Get and remove the worst-scoring move (last in sorted list)
             Board.GameState newGameState = gameState;
-            List<Move> bestMoves = List.of(possibleMoves.remove(possibleMoves.size() - 1));
+            List<Move> bestMoves = new ArrayList<>(List.of(possibleMoves.remove(possibleMoves.size() - 1)));
 
             while (bestMoves.get(bestMoves.size() -1) != null && bestMoves.get(bestMoves.size() - 1).commencedBy().isDetective()) { // while detectives can move
                 newGameState = newGameState.advance(bestMoves.get(bestMoves.size() - 1));

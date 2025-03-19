@@ -4,6 +4,8 @@ import io.atlassian.fugue.Pair;
 import uk.ac.bris.cs.scotlandyard.model.Ai;
 import uk.ac.bris.cs.scotlandyard.model.Board;
 import uk.ac.bris.cs.scotlandyard.model.Move;
+import uk.ac.bris.cs.scotlandyard.model.MyGameStateFactory;
+import uk.ac.bris.cs.scotlandyard.ui.ai.AIGameState.AIGameStateFactory;
 import uk.ac.bris.cs.scotlandyard.ui.ai.GameStateFactory;
 
 import javax.annotation.Nonnull;
@@ -23,8 +25,10 @@ public class RecursiveAI  implements Ai {
     public Move pickMove(@Nonnull Board board, Pair<Long, TimeUnit> timeoutPair) {
         int MrXLocation = board.getAvailableMoves().stream().findFirst().get().source();
 
-        GameStateFactory gameStateFactory = new GameStateFactory();
-        Board.GameState gameState = gameStateFactory.getNewGameState(board, MrXLocation);
+//        GameStateFactory gameStateFactory = new GameStateFactory();
+//        Board.GameState gameState = gameStateFactory.getNewGameState(board, MrXLocation);
+        AIGameStateFactory gameStateFactory = new AIGameStateFactory();
+        Board.GameState gameState = gameStateFactory.build(board, MrXLocation, false);
 
         RecursiveTreeNode root = new RecursiveTreeNode(gameState, null, MrXLocation);
         return root.minimax(5, Integer.MIN_VALUE, Integer.MAX_VALUE, true, 6).getMove();
