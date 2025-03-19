@@ -3,11 +3,9 @@ package uk.ac.bris.cs.scotlandyard.ui.ai.GameTreeAI;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import io.atlassian.fugue.Pair;
 import uk.ac.bris.cs.scotlandyard.model.*;
-import uk.ac.bris.cs.scotlandyard.ui.ai.GameStateFactory;
+import uk.ac.bris.cs.scotlandyard.ui.ai.AIGameState.AIGameStateFactory;
 
 public class GameTreeAI implements Ai {
 
@@ -34,8 +32,8 @@ public class GameTreeAI implements Ai {
             Pair<Long, TimeUnit> timeoutPair) {
         int MrXLocation = board.getAvailableMoves().stream().findFirst().get().source();
 
-        GameStateFactory gameStateFactory = new GameStateFactory();
-        Board.GameState gameState = gameStateFactory.getNewGameState(board, MrXLocation);
+        AIGameStateFactory gameStateFactory = new AIGameStateFactory();
+        Board.GameState gameState = gameStateFactory.build(board, MrXLocation, true);
 
         GameTreeNode root = new GameTreeNode(gameState, null, MrXLocation);
         root.computeLevels(4, 6);

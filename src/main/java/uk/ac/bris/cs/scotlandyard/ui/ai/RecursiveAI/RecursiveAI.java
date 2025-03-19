@@ -4,12 +4,9 @@ import io.atlassian.fugue.Pair;
 import uk.ac.bris.cs.scotlandyard.model.Ai;
 import uk.ac.bris.cs.scotlandyard.model.Board;
 import uk.ac.bris.cs.scotlandyard.model.Move;
-import uk.ac.bris.cs.scotlandyard.model.MyGameStateFactory;
 import uk.ac.bris.cs.scotlandyard.ui.ai.AIGameState.AIGameStateFactory;
-import uk.ac.bris.cs.scotlandyard.ui.ai.GameStateFactory;
 
 import javax.annotation.Nonnull;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class RecursiveAI  implements Ai {
