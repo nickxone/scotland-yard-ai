@@ -92,7 +92,7 @@ public class RecursiveTreeNode {
             Board.GameState newGameState = gameState;
             Move bestMove = possibleMoves.remove(possibleMoves.size() - 1);
 
-            while (bestMove != null && !bestMove.commencedBy().isDetective()) { // while detectives can move
+            while (bestMove != null && bestMove.commencedBy().isDetective()) { // while detectives can move
                 newGameState = newGameState.advance(bestMove);
                 Board.GameState finalNewGameState = newGameState;
                 bestMove = newGameState.getAvailableMoves().stream()

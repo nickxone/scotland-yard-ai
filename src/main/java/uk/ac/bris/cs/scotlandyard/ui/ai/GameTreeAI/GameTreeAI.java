@@ -38,7 +38,7 @@ public class GameTreeAI implements Ai {
         Board.GameState gameState = gameStateFactory.getNewGameState(board, MrXLocation);
 
         GameTreeNode root = new GameTreeNode(gameState, null, MrXLocation);
-        root.computeLevels(3, 5);
+        root.computeLevels(4, 6);
         root = root.bestNode();
         return root.getMove();
     }

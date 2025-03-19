@@ -7,9 +7,11 @@ import uk.ac.bris.cs.scotlandyard.model.Move;
 import uk.ac.bris.cs.scotlandyard.ui.ai.GameStateFactory;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class RecursiveAI  implements Ai {
+
     @Nonnull
     @Override
     public String name() {
@@ -25,7 +27,7 @@ public class RecursiveAI  implements Ai {
         Board.GameState gameState = gameStateFactory.getNewGameState(board, MrXLocation);
 
         RecursiveTreeNode root = new RecursiveTreeNode(gameState, null, MrXLocation);
-        return root.minimax(3, Integer.MIN_VALUE, Integer.MAX_VALUE, true, 5).getMove();
+        return root.minimax(5, Integer.MIN_VALUE, Integer.MAX_VALUE, true, 6).getMove();
     }
 
 }

@@ -16,13 +16,13 @@ import java.util.stream.Collectors;
 
 public class DetectiveTreeNode {
     private Board.GameState gameState; // Current GameState
-    private Move move; // Move that was made to obtain current GameState
+    private List<Move> moves; // Move that was made to obtain current GameState
     private int MrXLocation;
     private int score;
 
-    DetectiveTreeNode(Board.GameState gameState, Move move, int MrXLocation) {
+    DetectiveTreeNode(Board.GameState gameState, List<Move> moves, int MrXLocation) {
         this.gameState = gameState;
-        this.move = move;
+        this.moves = moves;
         this.MrXLocation = MrXLocation;
         this.score = computeScore(this.gameState);
     }
@@ -70,7 +70,7 @@ public class DetectiveTreeNode {
             int newMrXLocation;
             if (move instanceof Move.DoubleMove) newMrXLocation = ((Move.DoubleMove) move).destination2;
             else newMrXLocation = ((Move.SingleMove) move).destination;
-            DetectiveTreeNode childNode = new DetectiveTreeNode(gameState.advance(move), move, newMrXLocation);
+            DetectiveTreeNode childNode = new DetectiveTreeNode(gameState.advance(move), List.of(move), newMrXLocation);
             possibleChildNodes.add(childNode);
         }
         List<DetectiveTreeNode> nodes = possibleChildNodes.stream()
@@ -90,18 +90,17 @@ public class DetectiveTreeNode {
         while (!possibleMoves.isEmpty() && childNodes.size() < maxNodes) {
             // Get and remove the worst-scoring move (last in sorted list)
             Board.GameState newGameState = gameState;
-            Move bestMove = possibleMoves.get(possibleMoves.size() - 1);
-//            Move bestMove = possibleMoves.remove(possibleMoves.size() - 1);
+            List<Move> bestMoves = List.of(possibleMoves.remove(possibleMoves.size() - 1));
 
-            while (bestMove != null && !bestMove.commencedBy().isDetective()) { // while detectives can move
-                newGameState = newGameState.advance(bestMove);
+            while (bestMoves.get(bestMoves.size() -1) != null && bestMoves.get(bestMoves.size() - 1).commencedBy().isDetective()) { // while detectives can move
+                newGameState = newGameState.advance(bestMoves.get(bestMoves.size() - 1));
                 Board.GameState finalNewGameState = newGameState;
-                bestMove = newGameState.getAvailableMoves().stream()
+                bestMoves.add(newGameState.getAvailableMoves().stream()
                         .min((a, b) -> Integer.compare(computeScore(finalNewGameState.advance(a)), computeScore(finalNewGameState.advance(b))))
-                        .orElse(null);
+                        .orElse(null));
             }
 
-            childNodes.add(new DetectiveTreeNode(newGameState, possibleMoves.remove(possibleMoves.size() - 1), MrXLocation));
+            childNodes.add(new DetectiveTreeNode(newGameState, bestMoves, MrXLocation));
         }
 
         return childNodes;
@@ -128,8 +127,7 @@ public class DetectiveTreeNode {
         return detectives.stream().map(location -> distances[location]).mapToInt(Integer::intValue).sum();
     }
 
-
-    public Move getMove() {
-        return move;
+    public List<Move> getMoves() {
+        return moves;
     }
 }
