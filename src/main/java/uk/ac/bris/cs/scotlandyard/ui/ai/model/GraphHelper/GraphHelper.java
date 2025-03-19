@@ -1,4 +1,4 @@
-package uk.ac.bris.cs.scotlandyard.ui.ai.GraphHelper;
+package uk.ac.bris.cs.scotlandyard.ui.ai.model.GraphHelper;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.graph.ImmutableValueGraph;

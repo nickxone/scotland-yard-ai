@@ -1,4 +1,4 @@
-package uk.ac.bris.cs.scotlandyard.ui.ai.RecursiveAI;
+package uk.ac.bris.cs.scotlandyard.ui.ai.model;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -7,8 +7,8 @@ import uk.ac.bris.cs.scotlandyard.model.Board;
 import uk.ac.bris.cs.scotlandyard.model.Move;
 import uk.ac.bris.cs.scotlandyard.model.Piece;
 import uk.ac.bris.cs.scotlandyard.model.ScotlandYard;
-import uk.ac.bris.cs.scotlandyard.ui.ai.GraphHelper.GraphHelper;
-import uk.ac.bris.cs.scotlandyard.ui.ai.GraphHelper.WeightedGraphHelper;
+import uk.ac.bris.cs.scotlandyard.ui.ai.model.GraphHelper.GraphHelper;
+import uk.ac.bris.cs.scotlandyard.ui.ai.model.GraphHelper.WeightedGraphHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +20,7 @@ public class DetectiveTreeNode {
     private int MrXLocation;
     private int score;
 
-    DetectiveTreeNode(Board.GameState gameState, List<Move> moves, int MrXLocation) {
+    public DetectiveTreeNode(Board.GameState gameState, List<Move> moves, int MrXLocation) {
         this.gameState = gameState;
         this.moves = moves;
         this.MrXLocation = MrXLocation;

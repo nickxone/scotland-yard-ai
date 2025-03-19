@@ -1,4 +1,4 @@
-package uk.ac.bris.cs.scotlandyard.ui.ai.GraphHelper;
+package uk.ac.bris.cs.scotlandyard.ui.ai.model.GraphHelper;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.graph.ImmutableValueGraph;
@@ -8,7 +8,7 @@ import uk.ac.bris.cs.scotlandyard.model.ScotlandYard;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 
-public class RegularGraphHelper implements GraphHelper {
+public class WeightedGraphHelper implements GraphHelper {
     // Dijkstra's algorithm
     @Override
     public int[] computeDistance(ImmutableValueGraph<Integer, ImmutableSet<ScotlandYard.Transport>> graph, int source) {
@@ -26,9 +26,18 @@ public class RegularGraphHelper implements GraphHelper {
             for (Integer e : graph.adjacentNodes(vertex)) {
                 ImmutableSet<ScotlandYard.Transport> transports = graph.edgeValue(vertex, e).get();
 
-                if (distTo[vertex] + 1 < distTo[e]) {
-                    distTo[e] = distTo[vertex] + 1;
-                    pq.add(new Pair<>(e, distTo[e]));
+                for (ScotlandYard.Transport transport : transports) {  // Calculate distance based on weighting tickets
+                    int distance = 0;
+                    switch (transport) {
+                        case TAXI -> distance = 1;
+                        case BUS -> distance = 2;
+                        case UNDERGROUND -> distance = 3;
+                        case FERRY -> distance = 5;
+                    }
+                    if (distTo[vertex] + distance < distTo[e]) {
+                        distTo[e] = distTo[vertex] + distance;
+                        pq.add(new Pair<>(e, distTo[e]));
+                    }
                 }
 
             }

@@ -1,4 +1,4 @@
-package uk.ac.bris.cs.scotlandyard.ui.ai.RecursiveAI;
+package uk.ac.bris.cs.scotlandyard.ui.ai.model;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -7,37 +7,37 @@ import uk.ac.bris.cs.scotlandyard.model.Board;
 import uk.ac.bris.cs.scotlandyard.model.Move;
 import uk.ac.bris.cs.scotlandyard.model.Piece;
 import uk.ac.bris.cs.scotlandyard.model.ScotlandYard;
-import uk.ac.bris.cs.scotlandyard.ui.ai.GraphHelper.GraphHelper;
-import uk.ac.bris.cs.scotlandyard.ui.ai.GraphHelper.WeightedGraphHelper;
+import uk.ac.bris.cs.scotlandyard.ui.ai.model.GraphHelper.GraphHelper;
+import uk.ac.bris.cs.scotlandyard.ui.ai.model.GraphHelper.WeightedGraphHelper;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class RecursiveTreeNode {
+public class MrXTreeNode {
     private Board.GameState gameState; // Current GameState
     private Move move; // Move that was made to obtain current GameState
     private int MrXLocation;
     private int score;
 
-    RecursiveTreeNode(Board.GameState gameState, Move move, int MrXLocation) {
+    public MrXTreeNode(Board.GameState gameState, Move move, int MrXLocation) {
         this.gameState = gameState;
         this.move = move;
         this.MrXLocation = MrXLocation;
         this.score = computeScore(this.gameState);
     }
 
-    public RecursiveTreeNode minimax(int depth, int alpha, int beta, boolean maximisingPlayer, int maxNodes) {
+    public MrXTreeNode minimax(int depth, int alpha, int beta, boolean maximisingPlayer, int maxNodes) {
         if (depth == 0 || !gameState.getWinner().isEmpty()) return this; // end of the tree, or there is a winner
 
-        List<RecursiveTreeNode> childNodes = maximisingPlayer ? computeMrXNodes(maxNodes) : computeDetectivesNodes(maxNodes);
+        List<MrXTreeNode> childNodes = maximisingPlayer ? computeMrXNodes(maxNodes) : computeDetectivesNodes(maxNodes);
         if (childNodes.isEmpty()) return this;
 
         if (maximisingPlayer) { // Mr. X wants to maximise the score
             int maxEval = Integer.MIN_VALUE;
-            RecursiveTreeNode maxNode = childNodes.get(0);
-            for (RecursiveTreeNode childNode : childNodes) {
-                RecursiveTreeNode evaluatedNode = childNode.minimax(depth - 1, alpha, beta, false, maxNodes);
+            MrXTreeNode maxNode = childNodes.get(0);
+            for (MrXTreeNode childNode : childNodes) {
+                MrXTreeNode evaluatedNode = childNode.minimax(depth - 1, alpha, beta, false, maxNodes);
                 if (evaluatedNode.score > maxEval) {
                     maxEval = evaluatedNode.score;
                     maxNode = childNode;
@@ -49,9 +49,9 @@ public class RecursiveTreeNode {
             return maxNode;
         } else { // Detectives want to minimise the score
             int minEval = Integer.MAX_VALUE;
-            RecursiveTreeNode minNode = childNodes.get(0);
-            for (RecursiveTreeNode childNode : childNodes) {
-                RecursiveTreeNode evaluatedNode = childNode.minimax(depth - 1, alpha, beta, true, maxNodes);
+            MrXTreeNode minNode = childNodes.get(0);
+            for (MrXTreeNode childNode : childNodes) {
+                MrXTreeNode evaluatedNode = childNode.minimax(depth - 1, alpha, beta, true, maxNodes);
                 if (evaluatedNode.score < minEval) {
                     minEval = evaluatedNode.score;
                     minNode = childNode;
@@ -64,28 +64,28 @@ public class RecursiveTreeNode {
         }
     }
 
-    private List<RecursiveTreeNode> computeMrXNodes(int maxNodes) {
-        List<RecursiveTreeNode> possibleChildNodes = new ArrayList<>();
+    private List<MrXTreeNode> computeMrXNodes(int maxNodes) {
+        List<MrXTreeNode> possibleChildNodes = new ArrayList<>();
         for (Move move : gameState.getAvailableMoves()) {
             int newMrXLocation;
             if (move instanceof Move.DoubleMove) newMrXLocation = ((Move.DoubleMove) move).destination2;
             else newMrXLocation = ((Move.SingleMove) move).destination;
-            RecursiveTreeNode childNode = new RecursiveTreeNode(gameState.advance(move), move, newMrXLocation);
+            MrXTreeNode childNode = new MrXTreeNode(gameState.advance(move), move, newMrXLocation);
             possibleChildNodes.add(childNode);
         }
-        List<RecursiveTreeNode> nodes = possibleChildNodes.stream()
+        List<MrXTreeNode> nodes = possibleChildNodes.stream()
                 .sorted((a, b) -> Integer.compare(b.score, a.score)) // sort in descending order (the higher score, the better)
                 .limit(maxNodes)
                 .collect(Collectors.toList());
         return nodes;
     }
 
-    private List<RecursiveTreeNode> computeDetectivesNodes(int maxNodes) {
+    private List<MrXTreeNode> computeDetectivesNodes(int maxNodes) {
         List<Move> possibleMoves = new ArrayList<>(gameState.getAvailableMoves().stream()
                 .sorted((a, b) -> Integer.compare(computeScore(gameState.advance(b)), computeScore(gameState.advance(a))))
                 .toList()); // Sort available moves in descending order of computed score (worse moves last)
 
-        List<RecursiveTreeNode> childNodes = new ArrayList<>();
+        List<MrXTreeNode> childNodes = new ArrayList<>();
 
         while (!possibleMoves.isEmpty() && childNodes.size() < maxNodes) {
             // Get and remove the worst-scoring move (last in sorted list)
@@ -100,7 +100,7 @@ public class RecursiveTreeNode {
                         .orElse(null));
             }
 
-            childNodes.add(new RecursiveTreeNode(newGameState, bestMoves.get(0), MrXLocation));
+            childNodes.add(new MrXTreeNode(newGameState, bestMoves.get(0), MrXLocation));
         }
 
         return childNodes;

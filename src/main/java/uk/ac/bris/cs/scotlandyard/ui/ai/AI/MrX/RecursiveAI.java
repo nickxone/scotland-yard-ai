@@ -1,10 +1,11 @@
-package uk.ac.bris.cs.scotlandyard.ui.ai.RecursiveAI;
+package uk.ac.bris.cs.scotlandyard.ui.ai.AI.MrX;
 
 import io.atlassian.fugue.Pair;
 import uk.ac.bris.cs.scotlandyard.model.Ai;
 import uk.ac.bris.cs.scotlandyard.model.Board;
 import uk.ac.bris.cs.scotlandyard.model.Move;
-import uk.ac.bris.cs.scotlandyard.ui.ai.AIGameState.AIGameStateFactory;
+import uk.ac.bris.cs.scotlandyard.ui.ai.model.AIGameState.AIGameStateFactory;
+import uk.ac.bris.cs.scotlandyard.ui.ai.model.MrXTreeNode;
 
 import javax.annotation.Nonnull;
 import java.util.concurrent.TimeUnit;
@@ -27,7 +28,7 @@ public class RecursiveAI  implements Ai {
         AIGameStateFactory gameStateFactory = new AIGameStateFactory();
         Board.GameState gameState = gameStateFactory.build(board, MrXLocation, false);
 
-        RecursiveTreeNode root = new RecursiveTreeNode(gameState, null, MrXLocation);
+        MrXTreeNode root = new MrXTreeNode(gameState, null, MrXLocation);
         return root.minimax(5, Integer.MIN_VALUE, Integer.MAX_VALUE, true, 6).getMove();
     }
 

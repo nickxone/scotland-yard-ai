@@ -1,11 +1,11 @@
-package uk.ac.bris.cs.scotlandyard.ui.ai.GameTreeAI;
+package uk.ac.bris.cs.scotlandyard.ui.ai.model;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.graph.ImmutableValueGraph;
 import uk.ac.bris.cs.scotlandyard.model.*;
-import uk.ac.bris.cs.scotlandyard.ui.ai.GraphHelper.GraphHelper;
-import uk.ac.bris.cs.scotlandyard.ui.ai.GraphHelper.WeightedGraphHelper;
+import uk.ac.bris.cs.scotlandyard.ui.ai.model.GraphHelper.GraphHelper;
+import uk.ac.bris.cs.scotlandyard.ui.ai.model.GraphHelper.WeightedGraphHelper;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -18,7 +18,7 @@ public class GameTreeNode {
 
     private List<GameTreeNode> childNodes;
 
-    GameTreeNode(Board.GameState gameState, Move move, int MrXLocation) {
+    public GameTreeNode(Board.GameState gameState, Move move, int MrXLocation) {
         this.gameState = gameState;
         this.move = move;
         this.MrXLocation = MrXLocation;
