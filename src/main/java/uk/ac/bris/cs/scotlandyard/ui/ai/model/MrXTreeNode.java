@@ -92,7 +92,7 @@ public class MrXTreeNode {
             Board.GameState newGameState = gameState;
             List<Move> bestMoves = new ArrayList<>(List.of(possibleMoves.remove(possibleMoves.size() - 1)));
 
-            while (bestMoves.get(bestMoves.size() - 1) != null && bestMoves.get(bestMoves.size() - 1).commencedBy().isDetective()) { // while detectives can move
+            while (bestMoves.get(bestMoves.size() - 1) != null && bestMoves.get(bestMoves.size() - 1).commencedBy().isDetective() && !newGameState.getWinner().isEmpty()) { // while detectives can move
                 newGameState = newGameState.advance(bestMoves.get(bestMoves.size() - 1));
                 Board.GameState finalNewGameState = newGameState;
                 bestMoves.add(newGameState.getAvailableMoves().stream()
