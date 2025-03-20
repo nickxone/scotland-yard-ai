@@ -7,6 +7,7 @@ import uk.ac.bris.cs.scotlandyard.model.Board;
 import uk.ac.bris.cs.scotlandyard.model.Move;
 import uk.ac.bris.cs.scotlandyard.model.Piece;
 import uk.ac.bris.cs.scotlandyard.model.ScotlandYard;
+import uk.ac.bris.cs.scotlandyard.ui.ai.model.AIGameState.AIGameState;
 import uk.ac.bris.cs.scotlandyard.ui.ai.model.GraphHelper.GraphHelper;
 import uk.ac.bris.cs.scotlandyard.ui.ai.model.GraphHelper.WeightedGraphHelper;
 
@@ -15,12 +16,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class DetectiveTreeNode {
-    private Board.GameState gameState; // Current GameState
-    private List<Move> moves; // Move that was made to obtain current GameState
+    private AIGameState gameState; // Current GameState
+    private List<Move> moves; // Moves that were made to obtain current GameState
     private int MrXLocation;
     private int score;
 
-    public DetectiveTreeNode(Board.GameState gameState, List<Move> moves, int MrXLocation) {
+    public DetectiveTreeNode(AIGameState gameState, List<Move> moves, int MrXLocation) {
         this.gameState = gameState;
         this.moves = moves;
         this.MrXLocation = MrXLocation;
@@ -28,7 +29,9 @@ public class DetectiveTreeNode {
     }
 
     public DetectiveTreeNode minimax(int depth, int alpha, int beta, boolean maximisingPlayer, int maxNodes) {
-        if (depth == 0 || !gameState.getWinner().isEmpty()) return this; // end of the tree, or there is a winner
+//        if (depth == 0 || !gameState.getWinner().isEmpty()) return this; // end of the tree, or there is a winner
+        Piece MrX = gameState.getPlayers().stream().filter(Piece::isMrX).findFirst().get();
+        if (depth == 0 || (gameState.getMrXTravelLog().size() == gameState.getSetup().moves.size() && gameState.getRemaining().contains(MrX))) return this;
 
         List<DetectiveTreeNode> childNodes = maximisingPlayer ? computeMrXNodes(maxNodes) : computeDetectivesNodes(maxNodes);
         if (childNodes.isEmpty()) return this;
@@ -60,6 +63,7 @@ public class DetectiveTreeNode {
                 beta = Math.min(beta, evaluatedNode.score);
                 if (beta <= alpha) break;
             }
+
             return minNode;
         }
     }
@@ -70,7 +74,7 @@ public class DetectiveTreeNode {
             int newMrXLocation;
             if (move instanceof Move.DoubleMove) newMrXLocation = ((Move.DoubleMove) move).destination2;
             else newMrXLocation = ((Move.SingleMove) move).destination;
-            DetectiveTreeNode childNode = new DetectiveTreeNode(gameState.advance(move), List.of(move), newMrXLocation);
+            DetectiveTreeNode childNode = new DetectiveTreeNode((AIGameState) gameState.advance(move), List.of(move), newMrXLocation);
             possibleChildNodes.add(childNode);
         }
         List<DetectiveTreeNode> nodes = possibleChildNodes.stream()
@@ -91,28 +95,27 @@ public class DetectiveTreeNode {
             // Get and remove the worst-scoring move (last in sorted list)
             Board.GameState newGameState = gameState;
             List<Move> bestMoves = new ArrayList<>(List.of(possibleMoves.remove(possibleMoves.size() - 1)));
-
             while (bestMoves.get(bestMoves.size() - 1) != null && bestMoves.get(bestMoves.size() - 1).commencedBy().isDetective()) { // while detectives can move
                 newGameState = newGameState.advance(bestMoves.get(bestMoves.size() - 1));
                 Board.GameState finalNewGameState = newGameState;
-                bestMoves.add(newGameState.getAvailableMoves().stream()
+                bestMoves.add(finalNewGameState.getAvailableMoves().stream()
                         .min((a, b) -> Integer.compare(computeScore(finalNewGameState.advance(a)), computeScore(finalNewGameState.advance(b))))
                         .filter(move -> move.commencedBy().isDetective())
                         .orElse(null));
             }
 
             bestMoves.remove(bestMoves.size() - 1);
-            childNodes.add(new DetectiveTreeNode(newGameState, bestMoves, MrXLocation));
+            childNodes.add(new DetectiveTreeNode((AIGameState) newGameState, bestMoves, MrXLocation));
         }
 
         return childNodes;
     }
 
-
     private int computeScore(Board.GameState currentGameState) { // score current node (board state, i.e. this.gameState)
+//        TODO: detectives shouldn't increase score by a lot if they 'think' they won, since they can't guarantee it
+
 //        TODO: consider how many tickets Mr.X has got left after the move (which ones he used), and how many available moves it has after the move
 //        TODO: if the current location of Mr.X is visible for detectives, encourage the use of secret ticket
-
         if (!currentGameState.getWinner().isEmpty()) { // Check if there is a winner
             return currentGameState.getWinner().contains(Piece.MrX.MRX) ? 1000 : -1000;
         }

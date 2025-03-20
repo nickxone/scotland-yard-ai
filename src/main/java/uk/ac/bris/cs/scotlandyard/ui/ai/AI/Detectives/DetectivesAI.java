@@ -4,6 +4,7 @@ import io.atlassian.fugue.Pair;
 import uk.ac.bris.cs.scotlandyard.model.Ai;
 import uk.ac.bris.cs.scotlandyard.model.Board;
 import uk.ac.bris.cs.scotlandyard.model.Move;
+import uk.ac.bris.cs.scotlandyard.ui.ai.model.AIGameState.AIGameState;
 import uk.ac.bris.cs.scotlandyard.ui.ai.model.AIGameState.AIGameStateFactory;
 import uk.ac.bris.cs.scotlandyard.ui.ai.model.DetectiveTreeNode;
 
@@ -35,11 +36,16 @@ public class DetectivesAI implements Ai {
             MrXLocation = 114; // Central location of Mr.X
 
             AIGameStateFactory aiGameStateFactory = new AIGameStateFactory();
-            Board.GameState gameState = aiGameStateFactory.build(board, MrXLocation, true);
+            AIGameState gameState = (AIGameState) aiGameStateFactory.build(board, MrXLocation, true);
 
             DetectiveTreeNode root = new DetectiveTreeNode(gameState, null, MrXLocation);
-            moves = root.minimax(1, Integer.MIN_VALUE, Integer.MAX_VALUE, false, 5).getMoves();
+            moves = root.minimax(1, Integer.MIN_VALUE, Integer.MAX_VALUE, false, 10).getMoves();
         }
-        return moves.remove(moves.size() - 1);
+
+        if (moves == null) {
+            System.out.println("No moves");
+        }
+
+        return moves.remove(0);
     }
 }

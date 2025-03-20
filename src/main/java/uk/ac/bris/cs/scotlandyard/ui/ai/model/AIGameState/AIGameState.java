@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-final class AIGameState implements Board.GameState {
+public final class AIGameState implements Board.GameState {
     private GameSetup setup;
     private ImmutableSet<Piece> remaining;
     private ImmutableList<LogEntry> log;
@@ -19,7 +19,7 @@ final class AIGameState implements Board.GameState {
     private ImmutableSet<Move> moves;
     private ImmutableSet<Piece> winner;
 
-    AIGameState(
+    public AIGameState(
             final GameSetup setup,
             final ImmutableSet<Piece> remaining,
             final ImmutableList<LogEntry> log,
@@ -73,7 +73,6 @@ final class AIGameState implements Board.GameState {
     }
 
     private void checkWinner() {
-
 //            Detectives win if:
 //            A detective finish a move on the same station as Mr X
         Optional<Player> countWinners = detectives
@@ -112,19 +111,20 @@ final class AIGameState implements Board.GameState {
                         .stream()
                         .map(Player::piece)
                         .collect(ImmutableSet.toImmutableSet());
-            } else if (this.log.size() == setup.moves.size()) {
+            } else if (this.log.size() == setup.moves.size() && remaining.contains(this.mrX.piece())) {
                 // game over after all moves used
                 winner = ImmutableSet.<Piece>builder().add(this.mrX.piece()).build();
                 // if remaining contains detectives, they should do the next move, game is not over
-                if (remaining.contains(this.mrX.piece())) {
-                    // else, remaining contains mr. X, moves should be empty, game is over
-                    this.moves = ImmutableSet.<Move>builder().build();
-                }
+//                if (remaining.contains(this.mrX.piece())) {
+//                    // else, remaining contains mr. X, moves should be empty, game is over
+//                    this.moves = ImmutableSet.<Move>builder().build();
+//                }
             }
-        } else {
-            // if the winner is detected, moves should be empty, game is over
-            this.moves = ImmutableSet.<Move>builder().build();
         }
+//        else {
+//            // if the winner is detected, moves should be empty, game is over
+//            this.moves = ImmutableSet.<Move>builder().build();
+//        }
     }
 
     @Nonnull
@@ -293,6 +293,10 @@ final class AIGameState implements Board.GameState {
     @Override
     public ImmutableSet<Piece> getWinner() {
         return this.winner;
+    }
+
+    public ImmutableSet<Piece> getRemaining() {
+        return remaining;
     }
 
     private ImmutableSet<Move> initMoves(ImmutableSet<Piece> rem) {
