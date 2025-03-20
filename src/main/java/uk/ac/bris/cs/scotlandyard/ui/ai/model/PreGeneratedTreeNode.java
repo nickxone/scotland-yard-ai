@@ -10,6 +10,7 @@ import uk.ac.bris.cs.scotlandyard.ui.ai.model.util.GraphHelper.WeightedGraphHelp
 import java.util.*;
 import java.util.stream.Collectors;
 
+/*-------------------FOR TESTING PURPOSES ONLY-------------------*/
 public class PreGeneratedTreeNode {
     private Board.GameState gameState;
     private Move move;

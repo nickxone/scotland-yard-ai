@@ -8,6 +8,7 @@ import uk.ac.bris.cs.scotlandyard.model.*;
 import uk.ac.bris.cs.scotlandyard.ui.ai.model.AIGameState.AIGameStateFactory;
 import uk.ac.bris.cs.scotlandyard.ui.ai.model.PreGeneratedTreeNode;
 
+/*-------------------FOR TESTING PURPOSES ONLY-------------------*/
 public class PreGeneratedTreeMrXAI implements Ai {
 
     @Nonnull

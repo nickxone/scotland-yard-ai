@@ -3,14 +3,9 @@ package uk.ac.bris.cs.scotlandyard.ui.ai.AI.Detectives;
 import io.atlassian.fugue.Pair;
 import uk.ac.bris.cs.scotlandyard.model.Ai;
 import uk.ac.bris.cs.scotlandyard.model.Board;
-import uk.ac.bris.cs.scotlandyard.model.LogEntry;
 import uk.ac.bris.cs.scotlandyard.model.Move;
-import uk.ac.bris.cs.scotlandyard.ui.ai.model.AIGameState.AIGameState;
-import uk.ac.bris.cs.scotlandyard.ui.ai.model.AIGameState.AIGameStateFactory;
 import uk.ac.bris.cs.scotlandyard.ui.ai.model.Factory.DetectivesNodeFactory;
-import uk.ac.bris.cs.scotlandyard.ui.ai.model.Factory.MrXNodeFactory;
 import uk.ac.bris.cs.scotlandyard.ui.ai.model.Factory.TreeNodeFactory;
-import uk.ac.bris.cs.scotlandyard.ui.ai.model.TreeNode.DetectiveTreeNode;
 import uk.ac.bris.cs.scotlandyard.ui.ai.model.TreeNode.GameTreeNode;
 
 import javax.annotation.Nonnull;
@@ -20,7 +15,6 @@ import java.util.concurrent.TimeUnit;
 
 public class DetectivesAI implements Ai {
     private List<Move> moves;
-    private int MrXLocation;
 
     @Nonnull
     @Override
@@ -31,7 +25,6 @@ public class DetectivesAI implements Ai {
     @Override
     public void onStart() {
         Ai.super.onStart();
-
         moves = new ArrayList<>();
     }
 

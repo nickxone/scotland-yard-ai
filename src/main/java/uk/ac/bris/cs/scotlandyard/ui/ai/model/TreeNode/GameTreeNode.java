@@ -1,14 +1,12 @@
 package uk.ac.bris.cs.scotlandyard.ui.ai.model.TreeNode;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.graph.ImmutableValueGraph;
-import uk.ac.bris.cs.scotlandyard.model.Board;
-import uk.ac.bris.cs.scotlandyard.model.Move;
-import uk.ac.bris.cs.scotlandyard.model.Piece;
-import uk.ac.bris.cs.scotlandyard.model.ScotlandYard;
+import uk.ac.bris.cs.scotlandyard.model.*;
 import uk.ac.bris.cs.scotlandyard.ui.ai.model.util.GraphHelper.GraphHelper;
-import uk.ac.bris.cs.scotlandyard.ui.ai.model.util.GraphHelper.WeightedGraphHelper;
+import uk.ac.bris.cs.scotlandyard.ui.ai.model.util.GraphHelper.RegularGraphHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,23 +73,56 @@ public abstract class GameTreeNode {
 
 
     private int computeScore(GameTreeNode node) { // score current node (board state, i.e. this.gameState)
-//        TODO: consider how many tickets Mr.X has got left after the move (which ones he used), and how many available moves it has after the move
-//        TODO: if the current location of Mr.X is visible for detectives, encourage the use of secret ticket
-//        TODO:
-        if (!node.gameState.getWinner().isEmpty()) { // Check if there is a winner
-            return node.gameState.getWinner().contains(Piece.MrX.MRX) ? 1000 : -1000;
-        }
+        int score = 0;
+
+        if (!node.gameState.getWinner().isEmpty() && node.gameState.getWinner().contains(Piece.MrX.MRX)) // Check if there is a winner
+            return -100000; // only case for Mr.X, as detectives' gameState doesn't check for a winner
 
         ImmutableValueGraph<Integer, ImmutableSet<ScotlandYard.Transport>> graph = node.gameState.getSetup().graph;
-        // Check distances to detectives
-        GraphHelper graphHelper = new WeightedGraphHelper();
-        int[] distances = graphHelper.computeDistance(graph, node.MrXLocation);
+        GraphHelper graphHelper = new RegularGraphHelper();
+        int[] distances = graphHelper.computeDistance(graph, node.MrXLocation); // Check distances to detectives
         ImmutableList<Integer> detectives = node.gameState.getPlayers().stream()
                 .filter(player -> !player.isMrX())
                 .map(player -> node.gameState.getDetectiveLocation((Piece.Detective) player).get())
                 .collect(ImmutableList.toImmutableList());
 
-        return detectives.stream().map(location -> distances[location]).mapToInt(Integer::intValue).sum();
+        // Encourage Mr.X to minimise distance to detectives
+        int distance = detectives.stream().map(location -> distances[location]).mapToInt(Integer::intValue).sum();
+        score += distance * 1000;
+
+        // Encourage Mr.X to use a secret tickets
+        if (moves != null) {
+            Move move = node.moves.get(0);
+            ImmutableList<LogEntry> travelLog = node.gameState.getMrXTravelLog();
+            if (move.commencedBy().isMrX() && travelLog.size() > 2) {
+                LogEntry entry = travelLog.get(travelLog.size() - 1);
+                if (entry.location().isPresent() && entry.ticket().equals(ScotlandYard.Ticket.SECRET)) score += 100;
+                else if (move instanceof Move.DoubleMove) {
+                    entry = travelLog.get(travelLog.size() - 2);
+                    if (entry.location().isPresent() && entry.ticket().equals(ScotlandYard.Ticket.SECRET))
+                        score += 100;
+                }
+            }
+        }
+
+        // Discourage Mr.X to use double tickets to early
+        if (moves != null && moves.get(0) instanceof Move.DoubleMove)
+            score -= (node.gameState.getSetup().moves.size() - node.gameState.getMrXTravelLog().size()) * 10;
+
+        // Encourage Mr.X to keep tickets
+        Piece mrXPiece = node.gameState.getPlayers().stream().filter(Piece::isMrX).findFirst().get();
+        score += scoreTickets(node.gameState, mrXPiece);
+
+        return score;
+    }
+
+    private int scoreTickets(Board.GameState gameState, Piece piece) {
+        Board.TicketBoard ticketBoard = gameState.getPlayerTickets(piece).get();
+        return ticketBoard.getCount(ScotlandYard.Ticket.TAXI) * 1000 +
+                ticketBoard.getCount(ScotlandYard.Ticket.BUS) * 2 +
+                ticketBoard.getCount(ScotlandYard.Ticket.UNDERGROUND) * 4 +
+                ticketBoard.getCount(ScotlandYard.Ticket.SECRET) * 20 +
+                ticketBoard.getCount(ScotlandYard.Ticket.DOUBLE) * 100;
     }
 
     protected abstract GameTreeNode createChild(Board.GameState gameState, List<Move> moves, int newLocation);
