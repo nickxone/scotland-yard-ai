@@ -6,14 +6,14 @@ import javax.annotation.Nonnull;
 import io.atlassian.fugue.Pair;
 import uk.ac.bris.cs.scotlandyard.model.*;
 import uk.ac.bris.cs.scotlandyard.ui.ai.model.AIGameState.AIGameStateFactory;
-import uk.ac.bris.cs.scotlandyard.ui.ai.model.PreGeneratedTreeNode;
+import uk.ac.bris.cs.scotlandyard.ui.ai.model.TreeNode.PreGeneratedTreeNode;
 
-public class GameTreeAI implements Ai {
+public class PreGeneratedTreeMrXAI implements Ai {
 
     @Nonnull
     @Override
     public String name() {
-        return "GameTree AI";
+        return "PreGeneratedTree Mr.X AI";
     }
 
     @Override
@@ -34,10 +34,10 @@ public class GameTreeAI implements Ai {
         int MrXLocation = board.getAvailableMoves().stream().findFirst().get().source();
 
         AIGameStateFactory gameStateFactory = new AIGameStateFactory();
-        Board.GameState gameState = gameStateFactory.build(board, MrXLocation, false);
+        Board.GameState gameState = gameStateFactory.build(board, MrXLocation, true);
 
         PreGeneratedTreeNode root = new PreGeneratedTreeNode(gameState, null, MrXLocation);
-        root.computeLevels(4, 6);
+        root.computeLevels(3, 6);
         root = root.bestNode();
         return root.getMove();
     }

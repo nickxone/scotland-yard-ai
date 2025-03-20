@@ -5,17 +5,17 @@ import uk.ac.bris.cs.scotlandyard.model.Ai;
 import uk.ac.bris.cs.scotlandyard.model.Board;
 import uk.ac.bris.cs.scotlandyard.model.Move;
 import uk.ac.bris.cs.scotlandyard.ui.ai.model.AIGameState.AIGameStateFactory;
-import uk.ac.bris.cs.scotlandyard.ui.ai.model.MrXTreeNode;
+import uk.ac.bris.cs.scotlandyard.ui.ai.model.TreeNode.MrXTreeNode;
 
 import javax.annotation.Nonnull;
 import java.util.concurrent.TimeUnit;
 
-public class RecursiveAI  implements Ai {
+public class MrXAI implements Ai {
 
     @Nonnull
     @Override
     public String name() {
-        return "Recursive AI";
+        return "Mr.X AI";
     }
 
     @Nonnull

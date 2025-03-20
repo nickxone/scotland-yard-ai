@@ -1,4 +1,4 @@
-package uk.ac.bris.cs.scotlandyard.ui.ai.model;
+package uk.ac.bris.cs.scotlandyard.ui.ai.model.TreeNode;
 
 import uk.ac.bris.cs.scotlandyard.model.Board;
 import uk.ac.bris.cs.scotlandyard.model.Move;

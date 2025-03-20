@@ -1,4 +1,4 @@
-package uk.ac.bris.cs.scotlandyard.ui.ai.model;
+package uk.ac.bris.cs.scotlandyard.ui.ai.model.TreeNode;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -94,7 +94,7 @@ public abstract class GameTreeNode {
         return detectives.stream().map(location -> distances[location]).mapToInt(Integer::intValue).sum();
     }
 
-    protected abstract GameTreeNode createChild(Board.GameState gameState, List<Move> move, int newLocation);
+    protected abstract GameTreeNode createChild(Board.GameState gameState, List<Move> moves, int newLocation);
 
     protected abstract GameTreeNode minimax(int depth, int alpha, int beta, boolean maximisingPlayer, int maxNodes);
 

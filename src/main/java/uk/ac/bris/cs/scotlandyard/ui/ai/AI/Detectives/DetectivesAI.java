@@ -7,7 +7,7 @@ import uk.ac.bris.cs.scotlandyard.model.LogEntry;
 import uk.ac.bris.cs.scotlandyard.model.Move;
 import uk.ac.bris.cs.scotlandyard.ui.ai.model.AIGameState.AIGameState;
 import uk.ac.bris.cs.scotlandyard.ui.ai.model.AIGameState.AIGameStateFactory;
-import uk.ac.bris.cs.scotlandyard.ui.ai.model.DetectiveTreeNode;
+import uk.ac.bris.cs.scotlandyard.ui.ai.model.TreeNode.DetectiveTreeNode;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -17,6 +17,8 @@ import java.util.concurrent.TimeUnit;
 public class DetectivesAI implements Ai {
     private List<Move> moves;
     private int MrXLocation;
+    private int depth;
+    private int maxNodes;
 
     @Nonnull
     @Override
@@ -27,8 +29,13 @@ public class DetectivesAI implements Ai {
     @Override
     public void onStart() {
         Ai.super.onStart();
+
+//        Set up the depth and max number of immediate child nodes for a tree
+        depth = 3;
+        maxNodes = 6;
+
         moves = new ArrayList<>();
-        MrXLocation = 114; // Central location on the board
+        MrXLocation = 114; // Approximately central location on the board
     }
 
     @Nonnull
@@ -44,10 +51,10 @@ public class DetectivesAI implements Ai {
             }
 
             AIGameStateFactory aiGameStateFactory = new AIGameStateFactory();
-            AIGameState gameState = (AIGameState) aiGameStateFactory.build(board, MrXLocation, false);
+            Board.GameState gameState = aiGameStateFactory.build(board, MrXLocation, false);
 
             DetectiveTreeNode root = new DetectiveTreeNode(gameState, null, MrXLocation);
-            moves = root.minimax(3, Integer.MIN_VALUE, Integer.MAX_VALUE, false, 6).getMoves();
+            moves = root.bestMoves(depth, maxNodes);
         }
 
         return moves.remove(0);
