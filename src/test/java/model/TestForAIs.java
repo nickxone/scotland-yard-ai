@@ -10,13 +10,14 @@ import uk.ac.bris.cs.scotlandyard.model.*;
 import uk.ac.bris.cs.scotlandyard.model.Move;
 //import uk.ac.bris.cs.scotlandyard.model.ParameterisedModelTestBase;
 import uk.ac.bris.cs.scotlandyard.model.Player;
-import uk.ac.bris.cs.scotlandyard.ui.ai.GameTreeAI.*;
-import uk.ac.bris.cs.scotlandyard.ui.ai.RecursiveAI.*;
+import uk.ac.bris.cs.scotlandyard.ui.ai.AI.MrX.*;
+import uk.ac.bris.cs.scotlandyard.ui.ai.AI.Detectives.*;
 import uk.ac.bris.cs.scotlandyard.ui.ai.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import io.atlassian.fugue.Pair;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
@@ -56,21 +57,54 @@ public class TestForAIs {
 	}
 
 	@Test public void testAIsPickMoveShouldBeEqual() {
-//        GameTreeAI aiGameTree = new GameTreeAI();
-//        RecursiveAI aiRecursive = new RecursiveAI();
-//        MyGameStateFactory myGameStateFactory = new MyGameStateFactory();
-//        var mrX = new Player(MRX, defaultMrXTickets(), 35);
-//        var blue = new Player(BLUE, defaultDetectiveTickets(), 53);
-//        var red = new Player(RED, defaultDetectiveTickets(), 26);
-//        var white = new Player(WHITE, defaultDetectiveTickets(), 50);
-//        var green = new Player(GREEN, defaultDetectiveTickets(), 29);
-//        var yellow = new Player(YELLOW, defaultDetectiveTickets(), 91);
-//
-//        Board.GameState state = myGameStateFactory.build(new GameSetup(defaultGraph, STANDARD24MOVES), mrX, blue, red, white, green, yellow);
-//
-//        Pair<Long, TimeUnit> pair = new Pair<>(1500L, TimeUnit.MINUTES);
-//        Move firstAiMove = aiGameTree.pickMove(state, pair);
-//        Move secondAiMove = aiRecursive.pickMove(state, pair);
-//        assertThat(firstAiMove.equals(secondAiMove)).isTrue();
-    }
+		PreGeneratedTreeMrXAI aiGameTree = new PreGeneratedTreeMrXAI();
+		MrXAI aiRecursive = new MrXAI();
+		MyGameStateFactory myGameStateFactory = new MyGameStateFactory();
+		var mrX = new Player(MRX, defaultMrXTickets(), 35);
+		var blue = new Player(BLUE, defaultDetectiveTickets(), 53);
+		var red = new Player(RED, defaultDetectiveTickets(), 26);
+		var white = new Player(WHITE, defaultDetectiveTickets(), 50);
+		var green = new Player(GREEN, defaultDetectiveTickets(), 29);
+		var yellow = new Player(YELLOW, defaultDetectiveTickets(), 91);
+
+		Board.GameState state = myGameStateFactory.build(new GameSetup(defaultGraph, STANDARD24MOVES), mrX, blue, red, white, green, yellow);
+
+		Pair<Long, TimeUnit> pair = new Pair<>(1500L, TimeUnit.MINUTES);
+		Move firstAiMove = aiGameTree.pickMove(state, pair);
+		Move secondAiMove = aiRecursive.pickMove(state, pair);
+		assertThat(firstAiMove.equals(secondAiMove)).isTrue();
+	}
+
+	@Test public void BenchMark() {
+		MrXAI aiRecursive = new MrXAI();
+		DetectivesAI detectivesAI = new DetectivesAI();
+		detectivesAI.onStart();
+		MyGameStateFactory myGameStateFactory = new MyGameStateFactory();
+		var mrX = new Player(MRX, defaultMrXTickets(), 104);
+		var red = new Player(RED, defaultDetectiveTickets(), 67);
+		var green = new Player(GREEN, defaultDetectiveTickets(), 94);
+		var blue = new Player(BLUE, defaultDetectiveTickets(), 141);
+		var white = new Player(WHITE, defaultDetectiveTickets(), 155);
+		var yellow = new Player(YELLOW, defaultDetectiveTickets(), 112);
+
+		Board.GameState state = myGameStateFactory.build(new GameSetup(defaultGraph, STANDARD24MOVES), mrX, blue, red, white, green, yellow);
+
+		Pair<Long, TimeUnit> pair = new Pair<>(1500L, TimeUnit.MINUTES);
+
+		while(state.getWinner().isEmpty()) {
+			Move mr1AiMove = aiRecursive.pickMove(state, pair);
+			state = state.advance(mr1AiMove);
+
+			while (state.getWinner().isEmpty() && !state.getAvailableMoves().stream().findFirst().get().commencedBy().isMrX() ) {
+				Move detectiveAI = detectivesAI.pickMove(state, pair);
+				System.out.println(state.getAvailableMoves());
+				state = state.advance(detectiveAI);
+			}
+			System.out.println("-----------------------------------------RecursiveAI----------------------------------------------");
+		}
+		assertThat(!state.getWinner().isEmpty()).isTrue();
+
+	}
+
 }
+
