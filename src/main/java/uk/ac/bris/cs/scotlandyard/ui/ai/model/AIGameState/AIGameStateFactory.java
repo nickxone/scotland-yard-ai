@@ -26,7 +26,7 @@ public final class AIGameStateFactory {
     public GameState build(
             Board board,
             int location,
-            boolean detectivesMove) {
+            boolean isMrXMove) {
         Piece mrXPiece = board.getPlayers().stream().filter(Piece::isMrX).findFirst().get();
         ImmutableMap<ScotlandYard.Ticket, Integer> mrXTickets = getTickets(board, mrXPiece);
 
@@ -37,10 +37,10 @@ public final class AIGameStateFactory {
         Player mrX = new Player(mrXPiece, mrXTickets, location);
         GameSetup setup = board.getSetup();
 
-        ImmutableSet<Piece> remaining = detectivesMove ?
-                board.getPlayers().stream().filter(player -> !player.isMrX()).collect(ImmutableSet.toImmutableSet()) :
-                ImmutableSet.of(mrXPiece);
-        return new AIGameState(setup, remaining, board.getMrXTravelLog(), mrX, detectives);
+        ImmutableSet<Piece> remaining = isMrXMove ?
+                ImmutableSet.of(mrXPiece) :
+                board.getPlayers().stream().filter(player -> !player.isMrX()).collect(ImmutableSet.toImmutableSet());
+        return new AIGameState(setup, remaining, board.getMrXTravelLog(), mrX, detectives, isMrXMove);
     }
 
 }

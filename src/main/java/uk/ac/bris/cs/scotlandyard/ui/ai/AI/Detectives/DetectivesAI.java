@@ -36,14 +36,10 @@ public class DetectivesAI implements Ai {
             MrXLocation = 114; // Central location of Mr.X
 
             AIGameStateFactory aiGameStateFactory = new AIGameStateFactory();
-            AIGameState gameState = (AIGameState) aiGameStateFactory.build(board, MrXLocation, true);
+            AIGameState gameState = (AIGameState) aiGameStateFactory.build(board, MrXLocation, false);
 
             DetectiveTreeNode root = new DetectiveTreeNode(gameState, null, MrXLocation);
-            moves = root.minimax(1, Integer.MIN_VALUE, Integer.MAX_VALUE, false, 10).getMoves();
-        }
-
-        if (moves == null) {
-            System.out.println("No moves");
+            moves = root.minimax(2, Integer.MIN_VALUE, Integer.MAX_VALUE, false, 6).getMoves();
         }
 
         return moves.remove(0);

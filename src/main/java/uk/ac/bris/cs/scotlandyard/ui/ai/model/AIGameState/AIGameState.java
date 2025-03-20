@@ -18,13 +18,15 @@ public final class AIGameState implements Board.GameState {
     private List<Player> detectives;
     private ImmutableSet<Move> moves;
     private ImmutableSet<Piece> winner;
+    private boolean isMrXBoard;
 
     public AIGameState(
             final GameSetup setup,
             final ImmutableSet<Piece> remaining,
             final ImmutableList<LogEntry> log,
             final Player mrX,
-            final List<Player> detectives) {
+            final List<Player> detectives,
+            final boolean isMrXBoard) {
 
         this.winner = ImmutableSet.<Piece>builder().build();
         this.setup = setup;
@@ -35,7 +37,7 @@ public final class AIGameState implements Board.GameState {
         this.moves = initMoves(this.remaining);
 
         checkValidState();
-        checkWinner();
+        if (isMrXBoard) checkWinner();
     }
 
     private boolean detectiveHasTicket(Object ticket) {
@@ -100,7 +102,7 @@ public final class AIGameState implements Board.GameState {
                 .mapToInt(i -> i)
                 .sum();
         // if the sum of all detectives' tickets is 0 then winner is MrX
-        if (count == 0) {
+        if (count == 0 || (this.moves.isEmpty() && !remaining.contains(mrX.piece()))) {
             winner = ImmutableSet.<Piece>builder().add(this.mrX.piece()).build();
         }
 
@@ -115,16 +117,16 @@ public final class AIGameState implements Board.GameState {
                 // game over after all moves used
                 winner = ImmutableSet.<Piece>builder().add(this.mrX.piece()).build();
                 // if remaining contains detectives, they should do the next move, game is not over
-//                if (remaining.contains(this.mrX.piece())) {
-//                    // else, remaining contains mr. X, moves should be empty, game is over
-//                    this.moves = ImmutableSet.<Move>builder().build();
-//                }
+                if (remaining.contains(this.mrX.piece())) {
+                    // else, remaining contains mr. X, moves should be empty, game is over
+                    this.moves = ImmutableSet.<Move>builder().build();
+                }
             }
         }
-//        else {
-//            // if the winner is detected, moves should be empty, game is over
-//            this.moves = ImmutableSet.<Move>builder().build();
-//        }
+        else {
+            // if the winner is detected, moves should be empty, game is over
+            this.moves = ImmutableSet.<Move>builder().build();
+        }
     }
 
     @Nonnull
@@ -135,7 +137,8 @@ public final class AIGameState implements Board.GameState {
         return move.accept(new Move.Visitor<GameState>() {
             // Compute the state of MrX's move that should be added to the log
             private LogEntry hideOrReveal(ScotlandYard.Ticket ticket, int destination, ImmutableList<LogEntry> newLog) {
-                return !setup.moves.get(newLog.size()) ?
+
+                return !setup.moves.get(Math.min(newLog.size(), setup.moves.size() - 1)) ?
                         LogEntry.hidden(ticket) :
                         LogEntry.reveal(ticket, destination);
             }
@@ -168,7 +171,7 @@ public final class AIGameState implements Board.GameState {
 
                     newRemaining = addDetectivesToRemaining();
 
-                    return new AIGameState(setup, newRemaining, newLog, newMrX, detectives);
+                    return new AIGameState(setup, newRemaining, newLog, newMrX, detectives, isMrXBoard);
                 } else {
                     // Find the detective who made the current move
                     Optional<Player> detective = detectives
@@ -199,7 +202,7 @@ public final class AIGameState implements Board.GameState {
                                 .build();
                     }
 
-                    return new AIGameState(setup, newRemaining, log, newMrX, updatedDetectives);
+                    return new AIGameState(setup, newRemaining, log, newMrX, updatedDetectives, isMrXBoard);
                 }
             }
 
@@ -219,7 +222,7 @@ public final class AIGameState implements Board.GameState {
 
                 ImmutableSet<Piece> newRemaining = addDetectivesToRemaining();
 
-                return new AIGameState(setup, newRemaining, newLog, newMrX, detectives);
+                return new AIGameState(setup, newRemaining, newLog, newMrX, detectives, isMrXBoard);
 
             }
         });
@@ -293,10 +296,6 @@ public final class AIGameState implements Board.GameState {
     @Override
     public ImmutableSet<Piece> getWinner() {
         return this.winner;
-    }
-
-    public ImmutableSet<Piece> getRemaining() {
-        return remaining;
     }
 
     private ImmutableSet<Move> initMoves(ImmutableSet<Piece> rem) {
