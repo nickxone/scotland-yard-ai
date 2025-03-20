@@ -27,7 +27,7 @@ public class RecursiveAI  implements Ai {
         Board.GameState gameState = gameStateFactory.build(board, MrXLocation, true);
 
         MrXTreeNode root = new MrXTreeNode(gameState, null, MrXLocation);
-        return root.minimax(3, Integer.MIN_VALUE, Integer.MAX_VALUE, true, 6).getMove();
+        return root.bestMoves(3, 6).get(0);
     }
 
 }

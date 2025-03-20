@@ -1,43 +1,32 @@
 package uk.ac.bris.cs.scotlandyard.ui.ai.model;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.graph.ImmutableValueGraph;
 import uk.ac.bris.cs.scotlandyard.model.Board;
 import uk.ac.bris.cs.scotlandyard.model.Move;
-import uk.ac.bris.cs.scotlandyard.model.Piece;
-import uk.ac.bris.cs.scotlandyard.model.ScotlandYard;
-import uk.ac.bris.cs.scotlandyard.ui.ai.model.util.GraphHelper.GraphHelper;
-import uk.ac.bris.cs.scotlandyard.ui.ai.model.util.GraphHelper.WeightedGraphHelper;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class MrXTreeNode {
-    private Board.GameState gameState; // Current GameState
-    private Move move; // Move that was made to obtain current GameState
-    private int MrXLocation;
-    private int score;
+public class MrXTreeNode extends GameTreeNode {
 
-    public MrXTreeNode(Board.GameState gameState, Move move, int MrXLocation) {
-        this.gameState = gameState;
-        this.move = move;
-        this.MrXLocation = MrXLocation;
-        this.score = computeScore(this.gameState);
+    public MrXTreeNode(Board.GameState gameState, List<Move> moves, int MrXLocation) {
+        super(gameState, moves, MrXLocation);
     }
 
-    public MrXTreeNode minimax(int depth, int alpha, int beta, boolean maximisingPlayer, int maxNodes) {
+    @Override
+    protected GameTreeNode createChild(Board.GameState gameState, List<Move> moves, int newLocation) {
+        return new MrXTreeNode(gameState, moves, newLocation);
+    }
+
+    protected GameTreeNode minimax(int depth, int alpha, int beta, boolean maximisingPlayer, int maxNodes) {
         if (depth == 0 || !gameState.getWinner().isEmpty()) return this; // end of the tree, or there is a winner
 
-        List<MrXTreeNode> childNodes = maximisingPlayer ? computeMrXNodes(maxNodes) : computeDetectivesNodes(maxNodes);
+        List<GameTreeNode> childNodes = maximisingPlayer ? computeMrXNodes(maxNodes) : computeDetectivesNodes(maxNodes);
         if (childNodes.isEmpty()) return this;
 
         if (maximisingPlayer) { // Mr. X wants to maximise the score
             int maxEval = Integer.MIN_VALUE;
-            MrXTreeNode maxNode = childNodes.get(0);
-            for (MrXTreeNode childNode : childNodes) {
-                MrXTreeNode evaluatedNode = childNode.minimax(depth - 1, alpha, beta, false, maxNodes);
+            GameTreeNode maxNode = childNodes.get(0);
+            for (GameTreeNode childNode : childNodes) {
+                GameTreeNode evaluatedNode = childNode.minimax(depth - 1, alpha, beta, false, maxNodes);
                 if (evaluatedNode.score > maxEval) {
                     maxEval = evaluatedNode.score;
                     maxNode = childNode;
@@ -49,9 +38,9 @@ public class MrXTreeNode {
             return maxNode;
         } else { // Detectives want to minimise the score
             int minEval = Integer.MAX_VALUE;
-            MrXTreeNode minNode = childNodes.get(0);
-            for (MrXTreeNode childNode : childNodes) {
-                MrXTreeNode evaluatedNode = childNode.minimax(depth - 1, alpha, beta, true, maxNodes);
+            GameTreeNode minNode = childNodes.get(0);
+            for (GameTreeNode childNode : childNodes) {
+                GameTreeNode evaluatedNode = childNode.minimax(depth - 1, alpha, beta, true, maxNodes);
                 if (evaluatedNode.score < minEval) {
                     minEval = evaluatedNode.score;
                     minNode = childNode;
@@ -64,71 +53,9 @@ public class MrXTreeNode {
         }
     }
 
-    private List<MrXTreeNode> computeMrXNodes(int maxNodes) {
-        List<MrXTreeNode> possibleChildNodes = new ArrayList<>();
-        for (Move move : gameState.getAvailableMoves()) {
-            int newMrXLocation;
-            if (move instanceof Move.DoubleMove) newMrXLocation = ((Move.DoubleMove) move).destination2;
-            else newMrXLocation = ((Move.SingleMove) move).destination;
-            MrXTreeNode childNode = new MrXTreeNode(gameState.advance(move), move, newMrXLocation);
-            possibleChildNodes.add(childNode);
-        }
-        List<MrXTreeNode> nodes = possibleChildNodes.stream()
-                .sorted((a, b) -> Integer.compare(b.score, a.score)) // sort in descending order (the higher score, the better)
-                .limit(maxNodes)
-                .collect(Collectors.toList());
-        return nodes;
+    @Override
+    public List<Move> bestMoves(int depth, int maxNodes) {
+        return minimax(depth, Integer.MIN_VALUE, Integer.MAX_VALUE, true, maxNodes).moves;
     }
 
-    private List<MrXTreeNode> computeDetectivesNodes(int maxNodes) {
-        List<Move> possibleMoves = new ArrayList<>(gameState.getAvailableMoves().stream()
-                .sorted((a, b) -> Integer.compare(computeScore(gameState.advance(b)), computeScore(gameState.advance(a))))
-                .toList()); // Sort available moves in descending order of computed score (worse moves last)
-
-        List<MrXTreeNode> childNodes = new ArrayList<>();
-
-        while (!possibleMoves.isEmpty() && childNodes.size() < maxNodes) {
-            // Get and remove the worst-scoring move (last in sorted list)
-            Board.GameState newGameState = gameState;
-            List<Move> bestMoves = new ArrayList<>(List.of(possibleMoves.remove(possibleMoves.size() - 1)));
-
-            while (bestMoves.get(bestMoves.size() - 1) != null && bestMoves.get(bestMoves.size() - 1).commencedBy().isDetective() /* && newGameState.getWinner().isEmpty() */) { // while detectives can move
-                newGameState = newGameState.advance(bestMoves.get(bestMoves.size() - 1));
-                Board.GameState finalNewGameState = newGameState;
-                bestMoves.add(newGameState.getAvailableMoves().stream()
-                        .min((a, b) -> Integer.compare(computeScore(finalNewGameState.advance(a)), computeScore(finalNewGameState.advance(b))))
-                        .orElse(null));
-            }
-
-            childNodes.add(new MrXTreeNode(newGameState, bestMoves.get(0), MrXLocation));
-        }
-
-        return childNodes;
-    }
-
-
-    private int computeScore(Board.GameState currentGameState) { // score current node (board state, i.e. this.gameState)
-//        TODO: consider how many tickets Mr.X has got left after the move (which ones he used), and how many available moves it has after the move
-//        TODO: if the current location of Mr.X is visible for detectives, encourage the use of secret ticket
-//        TODO: 
-        if (!currentGameState.getWinner().isEmpty()) { // Check if there is a winner
-            return currentGameState.getWinner().contains(Piece.MrX.MRX) ? 1000 : -1000;
-        }
-
-        ImmutableValueGraph<Integer, ImmutableSet<ScotlandYard.Transport>> graph = currentGameState.getSetup().graph;
-        // Check distances to detectives
-        GraphHelper graphHelper = new WeightedGraphHelper();
-        int[] distances = graphHelper.computeDistance(graph, MrXLocation);
-        ImmutableList<Integer> detectives = currentGameState.getPlayers().stream()
-                .filter(player -> !player.isMrX())
-                .map(player -> currentGameState.getDetectiveLocation((Piece.Detective) player).get())
-                .collect(ImmutableList.toImmutableList());
-
-        return detectives.stream().map(location -> distances[location]).mapToInt(Integer::intValue).sum();
-    }
-
-
-    public Move getMove() {
-        return move;
-    }
 }

@@ -3,132 +3,100 @@ package uk.ac.bris.cs.scotlandyard.ui.ai.model;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.graph.ImmutableValueGraph;
-import uk.ac.bris.cs.scotlandyard.model.*;
+import uk.ac.bris.cs.scotlandyard.model.Board;
+import uk.ac.bris.cs.scotlandyard.model.Move;
+import uk.ac.bris.cs.scotlandyard.model.Piece;
+import uk.ac.bris.cs.scotlandyard.model.ScotlandYard;
 import uk.ac.bris.cs.scotlandyard.ui.ai.model.util.GraphHelper.GraphHelper;
 import uk.ac.bris.cs.scotlandyard.ui.ai.model.util.GraphHelper.WeightedGraphHelper;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
-public class GameTreeNode {
-    private Board.GameState gameState;
-    private Move move;
-    private int MrXLocation;
-    private int score;
+public abstract class GameTreeNode {
+    protected Board.GameState gameState; // Current GameState
+    protected List<Move> moves; // Move that was made to obtain current GameState
+    protected int MrXLocation;
+    protected int score;
 
-    private List<GameTreeNode> childNodes;
-
-    public GameTreeNode(Board.GameState gameState, Move move, int MrXLocation) {
+    protected GameTreeNode(Board.GameState gameState, List<Move> moves, int MrXLocation) {
         this.gameState = gameState;
-        this.move = move;
+        this.moves = moves;
         this.MrXLocation = MrXLocation;
-        this.score = computeScore();
-        this.childNodes = new ArrayList<>();
+        this.score = computeScore(this);
     }
 
-    public GameTreeNode bestNode() {
-        return minimax(this);
-    }
-
-    private GameTreeNode minimax(GameTreeNode node) { // implements MiniMax algorithm
-        if (node.childNodes.isEmpty()) return node; // edge case
-
-        GameTreeNode bestNode = node.childNodes.get(0);
-        if (node.move == null || node.move.commencedBy().isDetective()) { // Maximising (Mr.X move)
-            for (GameTreeNode child : node.childNodes) {
-                GameTreeNode subNode = minimax(child);
-                if (subNode.score > bestNode.score) {
-                    bestNode = child;
-                }
-            }
-        } else {
-            for (GameTreeNode child : node.childNodes) { // Minimising (Detectives move)
-                GameTreeNode subNode = minimax(child);
-                if (subNode.score < bestNode.score) {
-                    bestNode = child;
-                }
-            }
-        }
-
-        return bestNode;
-    }
-
-    public void computeLevels(int levels, int maxNodes) {
-        if (levels <= 0) return;
-
-        if (this.move == null || this.move.commencedBy().isDetective()) { // MrX's turn is next
-            computeMrXLevel(maxNodes);
-        } else { // Detectives' turn is next
-            computeDetectivesLevel(maxNodes);
-        }
-
-        if (childNodes != null) {
-            for (GameTreeNode childNode : childNodes) {
-                childNode.computeLevels(levels - 1, maxNodes);
-            }
-        }
-    }
-
-    private void computeMrXLevel(int maxNodes) {
+    protected List<GameTreeNode> computeMrXNodes(int maxNodes) {
         List<GameTreeNode> possibleChildNodes = new ArrayList<>();
         for (Move move : gameState.getAvailableMoves()) {
             int newMrXLocation;
             if (move instanceof Move.DoubleMove) newMrXLocation = ((Move.DoubleMove) move).destination2;
             else newMrXLocation = ((Move.SingleMove) move).destination;
-            GameTreeNode childNode = new GameTreeNode(gameState.advance(move), move, newMrXLocation);
+            GameTreeNode childNode = createChild(gameState.advance(move), List.of(move), newMrXLocation);
             possibleChildNodes.add(childNode);
         }
-        childNodes = possibleChildNodes.stream()
+        return possibleChildNodes.stream()
                 .sorted((a, b) -> Integer.compare(b.score, a.score)) // sort in descending order (the higher score, the better)
                 .limit(maxNodes)
                 .collect(Collectors.toList());
     }
 
-    private void computeDetectivesLevel(int maxNodes) {
-        List<GameTreeNode> possibleChildNodes = new ArrayList<>();
-        List<GameTreeNode> possibleStates = gameState.getAvailableMoves().stream()
-                .map(move -> new GameTreeNode(gameState.advance(move), move, MrXLocation))
-                .sorted((a, b) -> Integer.compare(b.score, a.score))
-                .collect(Collectors.toList());
-        while (possibleChildNodes.size() < maxNodes) {
-            // advance the `newGameState` the number of detectives times
-            Board.GameState newGameState = gameState;
-            newGameState = newGameState.advance(possibleStates.get(possibleStates.size() - 1).move);
-            possibleStates.remove(possibleStates.size() - 1);
+    protected List<GameTreeNode> computeDetectivesNodes(int maxNodes) {
+        List<Move> possibleMoves = new ArrayList<>(gameState.getAvailableMoves().stream()
+                .sorted((a, b) ->
+                        Integer.compare(createChild(gameState.advance(b), moves, MrXLocation).score, createChild(gameState.advance(a), moves, MrXLocation).score))
+                .toList()); // Sort available moves in descending order of computed score (worse moves last)
 
-            for (int i = 0; i < newGameState.getPlayers().size() - 2; i++) {
+        List<GameTreeNode> childNodes = new ArrayList<>();
+
+        while (!possibleMoves.isEmpty() && childNodes.size() < maxNodes) {
+            // Get and remove the worst-scoring move (last in sorted list)
+            Board.GameState newGameState = gameState;
+            List<Move> bestMoves = new ArrayList<>(List.of(possibleMoves.remove(possibleMoves.size() - 1)));
+            while (bestMoves.get(bestMoves.size() - 1) != null && bestMoves.get(bestMoves.size() - 1).commencedBy().isDetective()) { // while detectives can move
+                newGameState = newGameState.advance(bestMoves.get(bestMoves.size() - 1));
                 Board.GameState finalNewGameState = newGameState;
-                Optional<GameTreeNode> currentBestNode = newGameState.getAvailableMoves().stream()
-                        .map(move -> new GameTreeNode(finalNewGameState.advance(move), move, MrXLocation))
-                        .min(Comparator.comparingInt(GameTreeNode::computeScore));
-                if (currentBestNode.isEmpty()) break;
-                newGameState = newGameState.advance(currentBestNode.get().move);
+
+                bestMoves.add(finalNewGameState.getAvailableMoves().stream()
+                        .min((a, b) ->
+                                Integer.compare(createChild(finalNewGameState.advance(a), moves, MrXLocation).score, createChild(finalNewGameState.advance(b), moves, MrXLocation).score))
+                        .filter(move -> move.commencedBy().isDetective())
+                        .orElse(null));
             }
-            Move detectivesMove = possibleStates.get(0).move; // the move doesn't matter as long as it was made by detectives
-            possibleChildNodes.add(new GameTreeNode(newGameState, detectivesMove, MrXLocation));
+
+            bestMoves.remove(null);
+
+            childNodes.add(createChild(newGameState, bestMoves, MrXLocation));
         }
-        childNodes = possibleChildNodes;
+
+        return childNodes;
     }
 
-    private int computeScore() { // score current node (board state, i.e. this.gameState)
-//        TODO: consider how many tickets Mr.X has got left after the move (which ones he used), and how many available moves it has after the move
-        if (!gameState.getWinner().isEmpty()) return 0; // detectives has won, therefore minimum score
 
-        ImmutableValueGraph<Integer, ImmutableSet<ScotlandYard.Transport>> graph = gameState.getSetup().graph;
-        // check distances to detectives
+    private int computeScore(GameTreeNode node) { // score current node (board state, i.e. this.gameState)
+//        TODO: consider how many tickets Mr.X has got left after the move (which ones he used), and how many available moves it has after the move
+//        TODO: if the current location of Mr.X is visible for detectives, encourage the use of secret ticket
+//        TODO:
+        if (!node.gameState.getWinner().isEmpty()) { // Check if there is a winner
+            return node.gameState.getWinner().contains(Piece.MrX.MRX) ? 1000 : -1000;
+        }
+
+        ImmutableValueGraph<Integer, ImmutableSet<ScotlandYard.Transport>> graph = node.gameState.getSetup().graph;
+        // Check distances to detectives
         GraphHelper graphHelper = new WeightedGraphHelper();
-//        GraphHelper graphHelper = new RegularGraphHelper();
-        int[] distances = graphHelper.computeDistance(graph, MrXLocation);
-        ImmutableList<Integer> detectives = gameState.getPlayers().stream()
+        int[] distances = graphHelper.computeDistance(graph, node.MrXLocation);
+        ImmutableList<Integer> detectives = node.gameState.getPlayers().stream()
                 .filter(player -> !player.isMrX())
-                .map(player -> gameState.getDetectiveLocation((Piece.Detective) player).get())
+                .map(player -> node.gameState.getDetectiveLocation((Piece.Detective) player).get())
                 .collect(ImmutableList.toImmutableList());
 
         return detectives.stream().map(location -> distances[location]).mapToInt(Integer::intValue).sum();
     }
 
-    public Move getMove() {
-        return move;
-    }
+    protected abstract GameTreeNode createChild(Board.GameState gameState, List<Move> move, int newLocation);
 
+    protected abstract GameTreeNode minimax(int depth, int alpha, int beta, boolean maximisingPlayer, int maxNodes);
+
+    public abstract List<Move> bestMoves(int depth, int maxNodes);
 }
