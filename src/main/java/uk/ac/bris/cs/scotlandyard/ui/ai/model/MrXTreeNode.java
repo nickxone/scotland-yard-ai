@@ -110,7 +110,7 @@ public class MrXTreeNode {
     private int computeScore(Board.GameState currentGameState) { // score current node (board state, i.e. this.gameState)
 //        TODO: consider how many tickets Mr.X has got left after the move (which ones he used), and how many available moves it has after the move
 //        TODO: if the current location of Mr.X is visible for detectives, encourage the use of secret ticket
-
+//        TODO: 
         if (!currentGameState.getWinner().isEmpty()) { // Check if there is a winner
             return currentGameState.getWinner().contains(Piece.MrX.MRX) ? 1000 : -1000;
         }
