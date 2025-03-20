@@ -49,11 +49,6 @@ public class DetectiveTreeNode extends GameTreeNode {
                 beta = Math.min(beta, evaluatedNode.score);
                 if (beta <= alpha) break;
             }
-            if (depth == 3) {
-                if (minNode.moves.size() < 5) {
-                    System.out.println("pizdec");
-                }
-            }
             return minNode;
         }
     }

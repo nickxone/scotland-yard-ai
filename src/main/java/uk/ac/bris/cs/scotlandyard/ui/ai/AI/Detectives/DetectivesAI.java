@@ -7,7 +7,11 @@ import uk.ac.bris.cs.scotlandyard.model.LogEntry;
 import uk.ac.bris.cs.scotlandyard.model.Move;
 import uk.ac.bris.cs.scotlandyard.ui.ai.model.AIGameState.AIGameState;
 import uk.ac.bris.cs.scotlandyard.ui.ai.model.AIGameState.AIGameStateFactory;
+import uk.ac.bris.cs.scotlandyard.ui.ai.model.Factory.DetectivesNodeFactory;
+import uk.ac.bris.cs.scotlandyard.ui.ai.model.Factory.MrXNodeFactory;
+import uk.ac.bris.cs.scotlandyard.ui.ai.model.Factory.TreeNodeFactory;
 import uk.ac.bris.cs.scotlandyard.ui.ai.model.TreeNode.DetectiveTreeNode;
+import uk.ac.bris.cs.scotlandyard.ui.ai.model.TreeNode.GameTreeNode;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -17,8 +21,6 @@ import java.util.concurrent.TimeUnit;
 public class DetectivesAI implements Ai {
     private List<Move> moves;
     private int MrXLocation;
-    private int depth;
-    private int maxNodes;
 
     @Nonnull
     @Override
@@ -30,31 +32,16 @@ public class DetectivesAI implements Ai {
     public void onStart() {
         Ai.super.onStart();
 
-//        Set up the depth and max number of immediate child nodes for a tree
-        depth = 3;
-        maxNodes = 6;
-
         moves = new ArrayList<>();
-        MrXLocation = 114; // Approximately central location on the board
     }
 
     @Nonnull
     @Override
     public Move pickMove(@Nonnull Board board, Pair<Long, TimeUnit> timeoutPair) {
         if (moves.isEmpty()) {
-
-            List<LogEntry> MrXLog = board.getMrXTravelLog().stream().toList();
-            for (LogEntry entry : MrXLog) {
-                if (entry.location().isPresent()) {
-                    MrXLocation = entry.location().get();
-                }
-            }
-
-            AIGameStateFactory aiGameStateFactory = new AIGameStateFactory();
-            Board.GameState gameState = aiGameStateFactory.build(board, MrXLocation, false);
-
-            DetectiveTreeNode root = new DetectiveTreeNode(gameState, null, MrXLocation);
-            moves = root.bestMoves(depth, maxNodes);
+            TreeNodeFactory DetectivesNodeFactory = new DetectivesNodeFactory();
+            GameTreeNode root = DetectivesNodeFactory.createRoot(board);
+            moves = root.bestMoves(3, 6);
         }
 
         return moves.remove(0);

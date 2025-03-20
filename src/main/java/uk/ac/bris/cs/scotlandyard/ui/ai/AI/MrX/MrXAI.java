@@ -5,6 +5,9 @@ import uk.ac.bris.cs.scotlandyard.model.Ai;
 import uk.ac.bris.cs.scotlandyard.model.Board;
 import uk.ac.bris.cs.scotlandyard.model.Move;
 import uk.ac.bris.cs.scotlandyard.ui.ai.model.AIGameState.AIGameStateFactory;
+import uk.ac.bris.cs.scotlandyard.ui.ai.model.Factory.MrXNodeFactory;
+import uk.ac.bris.cs.scotlandyard.ui.ai.model.Factory.TreeNodeFactory;
+import uk.ac.bris.cs.scotlandyard.ui.ai.model.TreeNode.GameTreeNode;
 import uk.ac.bris.cs.scotlandyard.ui.ai.model.TreeNode.MrXTreeNode;
 
 import javax.annotation.Nonnull;
@@ -21,12 +24,8 @@ public class MrXAI implements Ai {
     @Nonnull
     @Override
     public Move pickMove(@Nonnull Board board, Pair<Long, TimeUnit> timeoutPair) {
-        int MrXLocation = board.getAvailableMoves().stream().findFirst().get().source();
-
-        AIGameStateFactory gameStateFactory = new AIGameStateFactory();
-        Board.GameState gameState = gameStateFactory.build(board, MrXLocation, true);
-
-        MrXTreeNode root = new MrXTreeNode(gameState, null, MrXLocation);
+        TreeNodeFactory MrXNodeFactory = new MrXNodeFactory();
+        GameTreeNode root = MrXNodeFactory.createRoot(board);
         return root.bestMoves(3, 6).get(0);
     }
 

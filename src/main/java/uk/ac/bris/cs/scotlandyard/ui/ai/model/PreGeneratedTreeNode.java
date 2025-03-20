@@ -1,4 +1,4 @@
-package uk.ac.bris.cs.scotlandyard.ui.ai.model.TreeNode;
+package uk.ac.bris.cs.scotlandyard.ui.ai.model;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;

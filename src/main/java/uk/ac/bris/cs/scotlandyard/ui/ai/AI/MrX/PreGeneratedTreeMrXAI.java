@@ -6,14 +6,14 @@ import javax.annotation.Nonnull;
 import io.atlassian.fugue.Pair;
 import uk.ac.bris.cs.scotlandyard.model.*;
 import uk.ac.bris.cs.scotlandyard.ui.ai.model.AIGameState.AIGameStateFactory;
-import uk.ac.bris.cs.scotlandyard.ui.ai.model.TreeNode.PreGeneratedTreeNode;
+import uk.ac.bris.cs.scotlandyard.ui.ai.model.PreGeneratedTreeNode;
 
 public class PreGeneratedTreeMrXAI implements Ai {
 
     @Nonnull
     @Override
     public String name() {
-        return "PreGeneratedTree Mr.X AI";
+        return "(Made for Tests) PreGeneratedTree Mr.X AI";
     }
 
     @Override
