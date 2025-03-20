@@ -28,16 +28,19 @@ public class DetectivesAI implements Ai {
     public void onStart() {
         Ai.super.onStart();
         moves = new ArrayList<>();
-        MrXLocation = 114; // Central location of Mr.X
+        MrXLocation = 114; // Central location on the board
     }
 
     @Nonnull
     @Override
     public Move pickMove(@Nonnull Board board, Pair<Long, TimeUnit> timeoutPair) {
         if (moves.isEmpty()) {
+
             List<LogEntry> MrXLog = board.getMrXTravelLog().stream().toList();
-            if (MrXLog.get(MrXLog.size() - 1).location().isPresent()) {
-                MrXLocation = MrXLog.get(MrXLog.size() - 1).location().get();
+            for (LogEntry entry : MrXLog) {
+                if (entry.location().isPresent()) {
+                    MrXLocation = entry.location().get();
+                }
             }
 
             AIGameStateFactory aiGameStateFactory = new AIGameStateFactory();
@@ -47,13 +50,6 @@ public class DetectivesAI implements Ai {
             moves = root.minimax(3, Integer.MIN_VALUE, Integer.MAX_VALUE, false, 6).getMoves();
         }
 
-//        for (Move move : moves) {
-//            for (Move move1 : moves) {
-//                if (!move.equals(move1) && move.commencedBy().webColour().equals(move1.commencedBy().webColour())) {
-//                    System.out.println("a;sdf");
-//                }
-//            }
-//        }
         return moves.remove(0);
     }
 }

@@ -8,8 +8,8 @@ import uk.ac.bris.cs.scotlandyard.model.Move;
 import uk.ac.bris.cs.scotlandyard.model.Piece;
 import uk.ac.bris.cs.scotlandyard.model.ScotlandYard;
 import uk.ac.bris.cs.scotlandyard.ui.ai.model.AIGameState.AIGameState;
-import uk.ac.bris.cs.scotlandyard.ui.ai.model.GraphHelper.GraphHelper;
-import uk.ac.bris.cs.scotlandyard.ui.ai.model.GraphHelper.WeightedGraphHelper;
+import uk.ac.bris.cs.scotlandyard.ui.ai.model.util.GraphHelper.GraphHelper;
+import uk.ac.bris.cs.scotlandyard.ui.ai.model.util.GraphHelper.WeightedGraphHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,7 +62,11 @@ public class DetectiveTreeNode {
                 beta = Math.min(beta, evaluatedNode.score);
                 if (beta <= alpha) break;
             }
-
+            if (depth == 3) {
+                if (minNode.moves.size() < 5) {
+                    System.out.println("pizdec");
+                }
+            }
             return minNode;
         }
     }
@@ -103,8 +107,7 @@ public class DetectiveTreeNode {
                         .filter(move -> move.commencedBy().isDetective())
                         .orElse(null));
             }
-//            if (bestMoves.contains(null)) bestMoves.remove(bestMoves.size() - 1);
-//            bestMoves.remove(bestMoves.size() - 1);
+
             bestMoves.remove(null);
 
             childNodes.add(new DetectiveTreeNode(newGameState, bestMoves, MrXLocation));

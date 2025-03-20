@@ -7,8 +7,8 @@ import uk.ac.bris.cs.scotlandyard.model.Board;
 import uk.ac.bris.cs.scotlandyard.model.Move;
 import uk.ac.bris.cs.scotlandyard.model.Piece;
 import uk.ac.bris.cs.scotlandyard.model.ScotlandYard;
-import uk.ac.bris.cs.scotlandyard.ui.ai.model.GraphHelper.GraphHelper;
-import uk.ac.bris.cs.scotlandyard.ui.ai.model.GraphHelper.WeightedGraphHelper;
+import uk.ac.bris.cs.scotlandyard.ui.ai.model.util.GraphHelper.GraphHelper;
+import uk.ac.bris.cs.scotlandyard.ui.ai.model.util.GraphHelper.WeightedGraphHelper;
 
 import java.util.ArrayList;
 import java.util.List;
