@@ -83,7 +83,7 @@ public class SimulationTest {
 
             while (state.getWinner().isEmpty() && !state.getAvailableMoves().stream().findFirst().get().commencedBy().isMrX()) {
                 Move detectiveAI = detectivesAI.pickMove(state, pair);
-                System.out.println("Detective move= " + detectiveAI);
+                System.out.println("Detective move = " + detectiveAI);
                 state = state.advance(detectiveAI);
             }
         }
@@ -111,11 +111,11 @@ public class SimulationTest {
         while (state.getWinner().isEmpty()) {
             Move mr1AiMove = aiRecursive.pickMove(state, pair);
             state = state.advance(mr1AiMove);
-            System.out.println("MrX = move" + mr1AiMove);
+            System.out.println("MrX move = " + mr1AiMove);
 
             while (state.getWinner().isEmpty() && !state.getAvailableMoves().stream().findFirst().get().commencedBy().isMrX()) {
                 Move detectiveAI = detectivesAI.pickMove(state, pair);
-                System.out.println("Detective move= " + detectiveAI);
+                System.out.println("Detective move = " + detectiveAI);
                 state = state.advance(detectiveAI);
             }
         }
@@ -148,7 +148,7 @@ public class SimulationTest {
 
             while (state.getWinner().isEmpty() && !state.getAvailableMoves().stream().findFirst().get().commencedBy().isMrX()) {
                 Move detectiveAI = detectivesAI.pickMove(state, pair);
-                System.out.println("Detective move= " + detectiveAI);
+                System.out.println("Detective move = " + detectiveAI);
                 state = state.advance(detectiveAI);
             }
         }
