@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.graph.ImmutableValueGraph;
 import com.google.common.io.Resources;
-import model.NoAlphaBetaPruningAI.NoAlphaBetaPruningMrXAI;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import uk.ac.bris.cs.scotlandyard.model.*;
@@ -13,7 +12,6 @@ import uk.ac.bris.cs.scotlandyard.model.Move;
 import uk.ac.bris.cs.scotlandyard.model.Player;
 import uk.ac.bris.cs.scotlandyard.ui.ai.AI.MrX.*;
 import uk.ac.bris.cs.scotlandyard.ui.ai.AI.Detectives.*;
-import uk.ac.bris.cs.scotlandyard.ui.ai.model.util.GraphHelper.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -37,7 +35,7 @@ import static uk.ac.bris.cs.scotlandyard.model.ScotlandYard.Ticket.*;
  * tests here to work properly!</b>
  */
 
-public class BenchMark {
+public class SimulationTest {
     private static ImmutableValueGraph<Integer, ImmutableSet<Transport>> defaultGraph;
 
     static ImmutableMap<Ticket, Integer> makeTickets(
@@ -87,9 +85,9 @@ public class BenchMark {
                 System.out.println(state.getAvailableMoves());
                 state = state.advance(detectiveAI);
             }
-            System.out.println("-----------------------------------------RecursiveAI----------------------------------------------");
         }
-        assertThat(!state.getWinner().isEmpty()).isTrue();
+
+        assertThat(!state.getWinner().isEmpty()).isTrue(); // check that there is a winner at the end of the game
 
     }
 }
