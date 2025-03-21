@@ -84,41 +84,8 @@ public class TestForAIs {
         assertThat(firstAiMove.equals(secondAiMove)).isTrue();
     }
 
-//    @Test
-//    public void BenchMark() {
-//        MrXAI aiRecursive = new MrXAI();
-//        DetectivesAI detectivesAI = new DetectivesAI();
-//        detectivesAI.onStart();
-//        MyGameStateFactory myGameStateFactory = new MyGameStateFactory();
-//        var mrX = new Player(MRX, defaultMrXTickets(), 104);
-//        var red = new Player(RED, defaultDetectiveTickets(), 67);
-//        var green = new Player(GREEN, defaultDetectiveTickets(), 94);
-//        var blue = new Player(BLUE, defaultDetectiveTickets(), 141);
-//        var white = new Player(WHITE, defaultDetectiveTickets(), 155);
-//        var yellow = new Player(YELLOW, defaultDetectiveTickets(), 112);
-//
-//        Board.GameState state = myGameStateFactory.build(new GameSetup(defaultGraph, STANDARD24MOVES), mrX, blue, red, white, green, yellow);
-//
-//        Pair<Long, TimeUnit> pair = new Pair<>(1500L, TimeUnit.MINUTES);
-//
-//        while (state.getWinner().isEmpty()) {
-//            Move mr1AiMove = aiRecursive.pickMove(state, pair);
-//            state = state.advance(mr1AiMove);
-//
-//            while (state.getWinner().isEmpty() && !state.getAvailableMoves().stream().findFirst().get().commencedBy().isMrX()) {
-//                Move detectiveAI = detectivesAI.pickMove(state, pair);
-//                System.out.println(state.getAvailableMoves());
-//                state = state.advance(detectiveAI);
-//            }
-//            System.out.println("-----------------------------------------RecursiveAI----------------------------------------------");
-//        }
-//        assertThat(!state.getWinner().isEmpty()).isTrue();
-//
-//    }
-
     @Test
-    public void checkGraphHelper() {
-
+    public void BenchMark() {
         MrXAI aiRecursive = new MrXAI();
         DetectivesAI detectivesAI = new DetectivesAI();
         detectivesAI.onStart();
@@ -134,17 +101,51 @@ public class TestForAIs {
 
         Pair<Long, TimeUnit> pair = new Pair<>(1500L, TimeUnit.MINUTES);
 
+        while (state.getWinner().isEmpty()) {
+            Move mr1AiMove = aiRecursive.pickMove(state, pair);
+            state = state.advance(mr1AiMove);
+
+            while (state.getWinner().isEmpty() && !state.getAvailableMoves().stream().findFirst().get().commencedBy().isMrX()) {
+                Move detectiveAI = detectivesAI.pickMove(state, pair);
+                System.out.println(state.getAvailableMoves());
+                state = state.advance(detectiveAI);
+            }
+            System.out.println("-----------------------------------------RecursiveAI----------------------------------------------");
+        }
+        assertThat(!state.getWinner().isEmpty()).isTrue();
+
+    }
+
+    @Test
+    public void checkGraphHelperOnExpectedValues() {
+        MyGameStateFactory myGameStateFactory = new MyGameStateFactory();
+        var mrX = new Player(MRX, defaultMrXTickets(), 104);
+        var red = new Player(RED, defaultDetectiveTickets(), 67);
+        var green = new Player(GREEN, defaultDetectiveTickets(), 94);
+        var blue = new Player(BLUE, defaultDetectiveTickets(), 141);
+        var white = new Player(WHITE, defaultDetectiveTickets(), 155);
+        var yellow = new Player(YELLOW, defaultDetectiveTickets(), 112);
+
+        Board.GameState state = myGameStateFactory.build(new GameSetup(defaultGraph, STANDARD24MOVES), mrX, blue, red, white, green, yellow);
 
         GraphHelper graphHelper = new RegularGraphHelper();
         int [] res = graphHelper.computeDistance(state.getSetup().graph,114);
 
-        assertThat(res[10] == 5).isTrue();
-        assertThat(res[14] == 5).isTrue();
-        assertThat(res[13] == 4).isTrue();
-        assertThat(res[6] == 6).isTrue();
+//        System.out.println(res[1]+ " " + res[2]+ " " + res[3]+ " " + res[4]+ " " + res[5]+ " " + res[6]+ " " + res[7]+ " " + res[8]+ " " + res[9]);
+
+        assertThat(res[1] == 6).isTrue();
+        assertThat(res[2] == 6).isTrue();
         assertThat(res[3] == 5).isTrue();
+        assertThat(res[4] == 5).isTrue();
+        assertThat(res[5] == 7).isTrue();
+        assertThat(res[6] == 6).isTrue();
+        assertThat(res[7] == 6).isTrue();
+        assertThat(res[10] == 5).isTrue();
+        assertThat(res[13] == 4).isTrue();
+        assertThat(res[14] == 5).isTrue();
 
     }
 
+//    public void
 }
 
