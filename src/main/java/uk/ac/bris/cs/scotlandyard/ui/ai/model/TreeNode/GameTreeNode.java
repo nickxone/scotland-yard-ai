@@ -1,7 +1,6 @@
 package uk.ac.bris.cs.scotlandyard.ui.ai.model.TreeNode;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.graph.ImmutableValueGraph;
 import uk.ac.bris.cs.scotlandyard.model.*;
@@ -75,8 +74,8 @@ public abstract class GameTreeNode {
     private int computeScore(GameTreeNode node) { // score current node (board state, i.e. this.gameState)
         int score = 0;
 
-        if (!node.gameState.getWinner().isEmpty() && node.gameState.getWinner().contains(Piece.MrX.MRX)) // Check if there is a winner
-            return -100000; // only case for Mr.X, as detectives' gameState doesn't check for a winner
+        if (!node.gameState.getWinner().isEmpty()) // Check if there is a winner
+            return node.gameState.getWinner().contains(Piece.MrX.MRX) ? ScoreConstants.WIN_SCORE : ScoreConstants.LOSE_SCORE; // only case for Mr.X, as detectives' gameState doesn't check for a winner
 
         ImmutableValueGraph<Integer, ImmutableSet<ScotlandYard.Transport>> graph = node.gameState.getSetup().graph;
         GraphHelper graphHelper = new RegularGraphHelper();
@@ -88,7 +87,7 @@ public abstract class GameTreeNode {
 
         // Encourage Mr.X to minimise distance to detectives
         int distance = detectives.stream().map(location -> distances[location]).mapToInt(Integer::intValue).sum();
-        score += distance * 1000;
+        score += distance * ScoreConstants.DISTANCE_MULTIPLIER;
 
         // Encourage Mr.X to use a secret tickets
         if (moves != null) {
@@ -96,18 +95,21 @@ public abstract class GameTreeNode {
             ImmutableList<LogEntry> travelLog = node.gameState.getMrXTravelLog();
             if (move.commencedBy().isMrX() && travelLog.size() > 2) {
                 LogEntry entry = travelLog.get(travelLog.size() - 1);
-                if (entry.location().isPresent() && entry.ticket().equals(ScotlandYard.Ticket.SECRET)) score += 100;
+                if (entry.location().isPresent() && entry.ticket().equals(ScotlandYard.Ticket.SECRET))
+                    score += ScoreConstants.SECRET_TICKET_BONUS;
                 else if (move instanceof Move.DoubleMove) {
                     entry = travelLog.get(travelLog.size() - 2);
                     if (entry.location().isPresent() && entry.ticket().equals(ScotlandYard.Ticket.SECRET))
-                        score += 100;
+                        score += ScoreConstants.SECRET_TICKET_BONUS;
                 }
             }
         }
 
         // Discourage Mr.X to use double tickets to early
-        if (moves != null && moves.get(0) instanceof Move.DoubleMove)
-            score -= (node.gameState.getSetup().moves.size() - node.gameState.getMrXTravelLog().size()) * 10;
+        if (moves != null && moves.get(0) instanceof Move.DoubleMove) {
+            int remainingMoves = node.gameState.getSetup().moves.size() - node.gameState.getMrXTravelLog().size();
+            score -= remainingMoves * ScoreConstants.DOUBLE_TICKET_PENALTY_MULTIPLIER;
+        }
 
         // Encourage Mr.X to keep tickets
         Piece mrXPiece = node.gameState.getPlayers().stream().filter(Piece::isMrX).findFirst().get();
@@ -118,11 +120,11 @@ public abstract class GameTreeNode {
 
     private int scoreTickets(Board.GameState gameState, Piece piece) {
         Board.TicketBoard ticketBoard = gameState.getPlayerTickets(piece).get();
-        return ticketBoard.getCount(ScotlandYard.Ticket.TAXI) * 1000 +
-                ticketBoard.getCount(ScotlandYard.Ticket.BUS) * 2 +
-                ticketBoard.getCount(ScotlandYard.Ticket.UNDERGROUND) * 4 +
-                ticketBoard.getCount(ScotlandYard.Ticket.SECRET) * 20 +
-                ticketBoard.getCount(ScotlandYard.Ticket.DOUBLE) * 100;
+        return ticketBoard.getCount(ScotlandYard.Ticket.TAXI) * ScoreConstants.TAXI_TICKET_VALUE +
+                ticketBoard.getCount(ScotlandYard.Ticket.BUS) * ScoreConstants.BUS_TICKET_VALUE +
+                ticketBoard.getCount(ScotlandYard.Ticket.UNDERGROUND) * ScoreConstants.UNDERGROUND_TICKET_VALUE +
+                ticketBoard.getCount(ScotlandYard.Ticket.SECRET) * ScoreConstants.SECRET_TICKET_VALUE +
+                ticketBoard.getCount(ScotlandYard.Ticket.DOUBLE) * ScoreConstants.DOUBLE_TICKET_VALUE;
     }
 
     protected abstract GameTreeNode createChild(Board.GameState gameState, List<Move> moves, int newLocation);
