@@ -14,7 +14,7 @@ public class PreGeneratedTreeMrXAI implements Ai {
     @Nonnull
     @Override
     public String name() {
-        return "(Made for Tests) PreGeneratedTree Mr.X AI";
+        return "(FOR TESTING PURPOSES ONLY) PreGeneratedTree MrX AI";
     }
 
     @Override
@@ -38,9 +38,9 @@ public class PreGeneratedTreeMrXAI implements Ai {
         Board.GameState gameState = gameStateFactory.build(board, MrXLocation, true);
 
         PreGeneratedTreeNode root = new PreGeneratedTreeNode(gameState, null, MrXLocation);
-        root.computeLevels(3, 6);
+        root.computeLevels(6, 6);
         root = root.bestNode();
-        return root.getMove();
+        return root.getMoves().get(0);
     }
 
 }

@@ -21,7 +21,7 @@ public abstract class GameTreeNode {
         this.gameState = gameState;
         this.moves = moves;
         this.MrXLocation = MrXLocation;
-        this.score = computeScore(this);
+        this.score = computeScore();
     }
 
     protected List<GameTreeNode> computeMrXNodes(int maxNodes) {
@@ -71,18 +71,18 @@ public abstract class GameTreeNode {
     }
 
 
-    private int computeScore(GameTreeNode node) { // score current node (board state, i.e. this.gameState)
+    private int computeScore() { // score current node (board state, i.e. this.gameState)
         int score = 0;
 
-        if (!node.gameState.getWinner().isEmpty()) // Check if there is a winner
-            return node.gameState.getWinner().contains(Piece.MrX.MRX) ? ScoreConstants.WIN_SCORE : ScoreConstants.LOSE_SCORE; // only case for Mr.X, as detectives' gameState doesn't check for a winner
+        if (!this.gameState.getWinner().isEmpty()) // Check if there is a winner
+            return this.gameState.getWinner().contains(Piece.MrX.MRX) ? ScoreConstants.WIN_SCORE : ScoreConstants.LOSE_SCORE; // only case for Mr.X, as detectives' gameState doesn't check for a winner
 
-        ImmutableValueGraph<Integer, ImmutableSet<ScotlandYard.Transport>> graph = node.gameState.getSetup().graph;
+        ImmutableValueGraph<Integer, ImmutableSet<ScotlandYard.Transport>> graph = this.gameState.getSetup().graph;
         GraphHelper graphHelper = new RegularGraphHelper();
-        int[] distances = graphHelper.computeDistance(graph, node.MrXLocation); // Check distances to detectives
-        ImmutableList<Integer> detectives = node.gameState.getPlayers().stream()
+        int[] distances = graphHelper.computeDistance(graph, this.MrXLocation); // Check distances to detectives
+        ImmutableList<Integer> detectives = this.gameState.getPlayers().stream()
                 .filter(player -> !player.isMrX())
-                .map(player -> node.gameState.getDetectiveLocation((Piece.Detective) player).get())
+                .map(player -> this.gameState.getDetectiveLocation((Piece.Detective) player).get())
                 .collect(ImmutableList.toImmutableList());
 
         // Encourage Mr.X to minimise distance to detectives
@@ -91,8 +91,8 @@ public abstract class GameTreeNode {
 
         // Encourage Mr.X to use a secret tickets
         if (moves != null) {
-            Move move = node.moves.get(0);
-            ImmutableList<LogEntry> travelLog = node.gameState.getMrXTravelLog();
+            Move move = this.moves.get(0);
+            ImmutableList<LogEntry> travelLog = this.gameState.getMrXTravelLog();
             if (move.commencedBy().isMrX() && travelLog.size() > 2) {
                 LogEntry entry = travelLog.get(travelLog.size() - 1);
                 if (entry.location().isPresent() && entry.ticket().equals(ScotlandYard.Ticket.SECRET))
@@ -107,13 +107,13 @@ public abstract class GameTreeNode {
 
         // Discourage Mr.X to use double tickets to early
         if (moves != null && moves.get(0) instanceof Move.DoubleMove) {
-            int remainingMoves = node.gameState.getSetup().moves.size() - node.gameState.getMrXTravelLog().size();
+            int remainingMoves = this.gameState.getSetup().moves.size() - this.gameState.getMrXTravelLog().size();
             score -= remainingMoves * ScoreConstants.DOUBLE_TICKET_PENALTY_MULTIPLIER;
         }
 
         // Encourage Mr.X to keep tickets
-        Piece mrXPiece = node.gameState.getPlayers().stream().filter(Piece::isMrX).findFirst().get();
-        score += scoreTickets(node.gameState, mrXPiece);
+        Piece mrXPiece = this.gameState.getPlayers().stream().filter(Piece::isMrX).findFirst().get();
+        score += scoreTickets(this.gameState, mrXPiece);
 
         return score;
     }
