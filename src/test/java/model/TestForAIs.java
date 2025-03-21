@@ -117,7 +117,7 @@ public class TestForAIs {
     }
 
     @Test
-    public void checkGraphHelperOnExpectedValues() {
+    public void checkRegularGraphHelperOnExpectedValues() {
         MyGameStateFactory myGameStateFactory = new MyGameStateFactory();
         var mrX = new Player(MRX, defaultMrXTickets(), 104);
         var red = new Player(RED, defaultDetectiveTickets(), 67);
@@ -129,23 +129,53 @@ public class TestForAIs {
         Board.GameState state = myGameStateFactory.build(new GameSetup(defaultGraph, STANDARD24MOVES), mrX, blue, red, white, green, yellow);
 
         GraphHelper graphHelper = new RegularGraphHelper();
-        int [] res = graphHelper.computeDistance(state.getSetup().graph,114);
 
-//        System.out.println(res[1]+ " " + res[2]+ " " + res[3]+ " " + res[4]+ " " + res[5]+ " " + res[6]+ " " + res[7]+ " " + res[8]+ " " + res[9]);
+        int [] resGraph = graphHelper.computeDistance(state.getSetup().graph,114);
 
-        assertThat(res[1] == 6).isTrue();
-        assertThat(res[2] == 6).isTrue();
-        assertThat(res[3] == 5).isTrue();
-        assertThat(res[4] == 5).isTrue();
-        assertThat(res[5] == 7).isTrue();
-        assertThat(res[6] == 6).isTrue();
-        assertThat(res[7] == 6).isTrue();
-        assertThat(res[10] == 5).isTrue();
-        assertThat(res[13] == 4).isTrue();
-        assertThat(res[14] == 5).isTrue();
+        assertThat(resGraph[1] == 6).isTrue();
+        assertThat(resGraph[2] == 6).isTrue();
+        assertThat(resGraph[3] == 5).isTrue();
+        assertThat(resGraph[4] == 5).isTrue();
+        assertThat(resGraph[5] == 7).isTrue();
+        assertThat(resGraph[6] == 6).isTrue();
+        assertThat(resGraph[7] == 6).isTrue();
+        assertThat(resGraph[10] == 5).isTrue();
+        assertThat(resGraph[13] == 4).isTrue();
+        assertThat(resGraph[14] == 5).isTrue();
 
     }
 
-//    public void
+
+    @Test
+    public void checkWeightedGraphHelperOnExpectedValues() {
+        MyGameStateFactory myGameStateFactory = new MyGameStateFactory();
+        var mrX = new Player(MRX, defaultMrXTickets(), 104);
+        var red = new Player(RED, defaultDetectiveTickets(), 67);
+        var green = new Player(GREEN, defaultDetectiveTickets(), 94);
+        var blue = new Player(BLUE, defaultDetectiveTickets(), 141);
+        var white = new Player(WHITE, defaultDetectiveTickets(), 155);
+        var yellow = new Player(YELLOW, defaultDetectiveTickets(), 112);
+
+        Board.GameState state = myGameStateFactory.build(new GameSetup(defaultGraph, STANDARD24MOVES), mrX, blue, red, white, green, yellow);
+
+        WeightedGraphHelper weightedGraphHelper = new WeightedGraphHelper();
+
+        int [] resWeight= weightedGraphHelper.computeDistance(state.getSetup().graph,114);
+
+        System.out.println(resWeight[1]+ " " + resWeight[2]+ " " + resWeight[3]+ " " + resWeight[4]+ " " + resWeight[5]+ " " + resWeight[6]+ " " + resWeight[10]+ " " + resWeight[13]+ " " + resWeight[14]);
+
+        assertThat(resWeight[1] == 9).isTrue();
+        assertThat(resWeight[2] == 8).isTrue();
+        assertThat(resWeight[3] == 7).isTrue();
+        assertThat(resWeight[4] == 8).isTrue();
+        assertThat(resWeight[5] == 9).isTrue();
+        assertThat(resWeight[6] == 10).isTrue();
+        assertThat(resWeight[7] == 11).isTrue();
+        assertThat(resWeight[10] == 7).isTrue();
+        assertThat(resWeight[13] == 7).isTrue();
+        assertThat(resWeight[14] == 8).isTrue();
+
+    }
+
 }
 
