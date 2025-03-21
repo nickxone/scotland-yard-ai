@@ -9,7 +9,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
 		GraphHelperTest.class,
-		SimulationTest.class,
-		PickMoveAITest.class
+		PickMoveAITest.class,
+		SimulationTest.class
 })
 public class AllTest {}
