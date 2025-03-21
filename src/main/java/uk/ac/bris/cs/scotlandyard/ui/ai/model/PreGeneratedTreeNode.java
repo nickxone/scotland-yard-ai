@@ -126,7 +126,7 @@ public class PreGeneratedTreeNode {
             return this.gameState.getWinner().contains(Piece.MrX.MRX) ? ScoreConstants.WIN_SCORE : ScoreConstants.LOSE_SCORE; // only case for Mr.X, as detectives' gameState doesn't check for a winner
 
         ImmutableValueGraph<Integer, ImmutableSet<ScotlandYard.Transport>> graph = this.gameState.getSetup().graph;
-        GraphHelper graphHelper = new RegularGraphHelper();
+        GraphHelper graphHelper = new WeightedGraphHelper();
         int[] distances = graphHelper.computeDistance(graph, this.MrXLocation); // Check distances to detectives
         ImmutableList<Integer> detectives = this.gameState.getPlayers().stream()
                 .filter(player -> !player.isMrX())

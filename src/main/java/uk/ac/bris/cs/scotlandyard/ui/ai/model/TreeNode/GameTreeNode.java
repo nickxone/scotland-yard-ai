@@ -6,6 +6,7 @@ import com.google.common.graph.ImmutableValueGraph;
 import uk.ac.bris.cs.scotlandyard.model.*;
 import uk.ac.bris.cs.scotlandyard.ui.ai.model.util.GraphHelper.GraphHelper;
 import uk.ac.bris.cs.scotlandyard.ui.ai.model.util.GraphHelper.RegularGraphHelper;
+import uk.ac.bris.cs.scotlandyard.ui.ai.model.util.GraphHelper.WeightedGraphHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,7 +79,7 @@ public abstract class GameTreeNode {
             return this.gameState.getWinner().contains(Piece.MrX.MRX) ? ScoreConstants.WIN_SCORE : ScoreConstants.LOSE_SCORE; // only case for Mr.X, as detectives' gameState doesn't check for a winner
 
         ImmutableValueGraph<Integer, ImmutableSet<ScotlandYard.Transport>> graph = this.gameState.getSetup().graph;
-        GraphHelper graphHelper = new RegularGraphHelper();
+        GraphHelper graphHelper = new WeightedGraphHelper();
         int[] distances = graphHelper.computeDistance(graph, this.MrXLocation); // Check distances to detectives
         ImmutableList<Integer> detectives = this.gameState.getPlayers().stream()
                 .filter(player -> !player.isMrX())
