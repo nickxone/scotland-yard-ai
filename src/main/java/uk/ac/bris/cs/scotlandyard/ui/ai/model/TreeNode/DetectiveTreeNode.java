@@ -16,7 +16,7 @@ public class DetectiveTreeNode extends GameTreeNode {
         return new DetectiveTreeNode(gameState, moves, newLocation);
     }
 
-    public GameTreeNode minimax(int depth, int alpha, int beta, boolean maximisingPlayer, int maxNodes) {
+    protected GameTreeNode minimax(int depth, int alpha, int beta, boolean maximisingPlayer, int maxNodes) {
         if (depth == 0) return this;
 
         List<GameTreeNode> childNodes = maximisingPlayer ? computeMrXNodes(maxNodes) : computeDetectivesNodes(maxNodes);

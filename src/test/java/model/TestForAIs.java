@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.graph.ImmutableValueGraph;
 import com.google.common.io.Resources;
+import model.NoAlphaBetaPruningAI.NoAlphaBetaPruningMrXAI;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import uk.ac.bris.cs.scotlandyard.model.*;
@@ -64,7 +65,7 @@ public class TestForAIs {
 
     @Test
     public void testAIsPickMoveShouldBeEqual() {
-        PreGeneratedTreeMrXAI preGeneratedTreeAI = new PreGeneratedTreeMrXAI();
+        NoAlphaBetaPruningMrXAI preGeneratedTreeAI = new NoAlphaBetaPruningMrXAI();
         MrXAI MrXAI = new MrXAI();
 
         MyGameStateFactory myGameStateFactory = new MyGameStateFactory();

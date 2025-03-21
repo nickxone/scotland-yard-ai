@@ -1,102 +1,54 @@
-package uk.ac.bris.cs.scotlandyard.ui.ai.model;
+package uk.ac.bris.cs.scotlandyard.ui.ai.model.TreeNode;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.graph.ImmutableValueGraph;
 import uk.ac.bris.cs.scotlandyard.model.*;
-import uk.ac.bris.cs.scotlandyard.ui.ai.model.TreeNode.GameTreeNode;
-import uk.ac.bris.cs.scotlandyard.ui.ai.model.TreeNode.ScoreConstants;
-import uk.ac.bris.cs.scotlandyard.ui.ai.model.util.GraphHelper.GraphHelper;
+        import uk.ac.bris.cs.scotlandyard.ui.ai.model.util.GraphHelper.GraphHelper;
 import uk.ac.bris.cs.scotlandyard.ui.ai.model.util.GraphHelper.RegularGraphHelper;
 import uk.ac.bris.cs.scotlandyard.ui.ai.model.util.GraphHelper.WeightedGraphHelper;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
-/*-------------------FOR TESTING PURPOSES ONLY-------------------*/
-public class PreGeneratedTreeNode {
-    private Board.GameState gameState;
-    private List<Move> moves;
-    private int MrXLocation;
-    private int score;
+public class NoAlphaBetaPruningMrXTreeNode {
+    protected Board.GameState gameState; // Current GameState
+    protected List<Move> moves; // Move that was made to obtain current GameState
+    protected int MrXLocation;
+    protected int score;
 
-    private List<PreGeneratedTreeNode> childNodes;
-
-    public PreGeneratedTreeNode(Board.GameState gameState, List<Move> moves, int MrXLocation) {
+    public NoAlphaBetaPruningMrXTreeNode(Board.GameState gameState, List<Move> moves, int MrXLocation) {
         this.gameState = gameState;
         this.moves = moves;
         this.MrXLocation = MrXLocation;
         this.score = computeScore();
-        this.childNodes = new ArrayList<>();
     }
 
-    public PreGeneratedTreeNode bestNode() {
-        return minimax(this);
-    }
-
-    private PreGeneratedTreeNode minimax(PreGeneratedTreeNode node) { // implements MiniMax algorithm
-        if (node.childNodes.isEmpty() || !gameState.getWinner().isEmpty()) return node; // edge case
-
-        PreGeneratedTreeNode bestNode = node.childNodes.get(0);
-        if (node.moves == null || node.moves.get(0).commencedBy().isDetective()) { // Maximising (Mr.X move)
-            for (PreGeneratedTreeNode child : node.childNodes) {
-                PreGeneratedTreeNode subNode = minimax(child);
-                if (subNode.score > bestNode.score) {
-                    bestNode = child;
-                }
-            }
-        } else {
-            for (PreGeneratedTreeNode child : node.childNodes) { // Minimising (Detectives move)
-                PreGeneratedTreeNode subNode = minimax(child);
-                if (subNode.score < bestNode.score) {
-                    bestNode = child;
-                }
-            }
-        }
-
-        return bestNode;
-    }
-
-    public void computeLevels(int levels, int maxNodes) {
-        if (levels <= 0) return;
-
-        if (this.moves == null || this.moves.get(0).commencedBy().isDetective()) { // MrX's turn is next
-            computeMrXLevel(maxNodes);
-        } else { // Detectives' turn is next
-            computeDetectivesLevel(maxNodes);
-        }
-
-        if (childNodes != null) {
-            for (PreGeneratedTreeNode childNode : childNodes) {
-                childNode.computeLevels(levels - 1, maxNodes);
-            }
-        }
-    }
-
-    private void computeMrXLevel(int maxNodes) {
-        List<PreGeneratedTreeNode> possibleChildNodes = new ArrayList<>();
+    protected List<NoAlphaBetaPruningMrXTreeNode> computeMrXNodes(int maxNodes) {
+        List<NoAlphaBetaPruningMrXTreeNode> possibleChildNodes = new ArrayList<>();
         for (Move move : gameState.getAvailableMoves()) {
             int newMrXLocation;
             if (move instanceof Move.DoubleMove) newMrXLocation = ((Move.DoubleMove) move).destination2;
             else newMrXLocation = ((Move.SingleMove) move).destination;
-            PreGeneratedTreeNode childNode = new PreGeneratedTreeNode(gameState.advance(move), List.of(move), newMrXLocation);
+            NoAlphaBetaPruningMrXTreeNode childNode = new NoAlphaBetaPruningMrXTreeNode(gameState.advance(move), List.of(move), newMrXLocation);
             possibleChildNodes.add(childNode);
         }
-        childNodes = possibleChildNodes.stream()
+        return possibleChildNodes.stream()
                 .sorted((a, b) -> Integer.compare(b.score, a.score)) // sort in descending order (the higher score, the better)
                 .limit(maxNodes)
                 .collect(Collectors.toList());
     }
 
-    private void computeDetectivesLevel(int maxNodes) {
+    protected List<NoAlphaBetaPruningMrXTreeNode> computeDetectivesNodes(int maxNodes) {
         List<Move> possibleMoves = new ArrayList<>(gameState.getAvailableMoves().stream()
                 .sorted((a, b) ->
-                        Integer.compare(new PreGeneratedTreeNode(gameState.advance(b), moves, MrXLocation).score, new PreGeneratedTreeNode(gameState.advance(a), moves, MrXLocation).score))
+                        Integer.compare(new NoAlphaBetaPruningMrXTreeNode(gameState.advance(b), moves, MrXLocation).score, new NoAlphaBetaPruningMrXTreeNode(gameState.advance(a), moves, MrXLocation).score))
                 .toList()); // Sort available moves in descending order of computed score (worse moves last)
 
-        List<PreGeneratedTreeNode> newChildNodes = new ArrayList<>();
+        List<NoAlphaBetaPruningMrXTreeNode> childNodes = new ArrayList<>();
 
-        while (!possibleMoves.isEmpty() && newChildNodes.size() < maxNodes) {
+        while (!possibleMoves.isEmpty() && childNodes.size() < maxNodes) {
             // Get and remove the worst-scoring move (last in sorted list)
             Board.GameState newGameState = gameState;
             List<Move> bestMoves = new ArrayList<>(List.of(possibleMoves.remove(possibleMoves.size() - 1)));
@@ -106,18 +58,19 @@ public class PreGeneratedTreeNode {
 
                 bestMoves.add(finalNewGameState.getAvailableMoves().stream()
                         .min((a, b) ->
-                                Integer.compare(new PreGeneratedTreeNode(finalNewGameState.advance(a), moves, MrXLocation).score, new PreGeneratedTreeNode(finalNewGameState.advance(b), moves, MrXLocation).score))
+                                Integer.compare(new NoAlphaBetaPruningMrXTreeNode(finalNewGameState.advance(a), moves, MrXLocation).score, new NoAlphaBetaPruningMrXTreeNode(finalNewGameState.advance(b), moves, MrXLocation).score))
                         .filter(move -> move.commencedBy().isDetective())
                         .orElse(null));
             }
 
             bestMoves.remove(null);
 
-            newChildNodes.add(new PreGeneratedTreeNode(newGameState, bestMoves, MrXLocation));
+            childNodes.add(new NoAlphaBetaPruningMrXTreeNode(newGameState, bestMoves, MrXLocation));
         }
 
-        childNodes = newChildNodes;
+        return childNodes;
     }
+
 
     private int computeScore() { // score current node (board state, i.e. this.gameState)
         int score = 0;
@@ -176,8 +129,40 @@ public class PreGeneratedTreeNode {
     }
 
 
-    public List<Move> getMoves() {
-        return moves;
+    protected NoAlphaBetaPruningMrXTreeNode minimax(int depth, int alpha, int beta, boolean maximisingPlayer, int maxNodes) {
+        if (depth == 0 || !gameState.getWinner().isEmpty()) return this; // end of the tree, or there is a winner
+
+        List<NoAlphaBetaPruningMrXTreeNode> childNodes = maximisingPlayer ? computeMrXNodes(maxNodes) : computeDetectivesNodes(maxNodes);
+        if (childNodes.isEmpty()) return this;
+
+        if (maximisingPlayer) { // Mr. X wants to maximise the score
+            int maxEval = Integer.MIN_VALUE;
+            NoAlphaBetaPruningMrXTreeNode maxNode = childNodes.get(0);
+            for (NoAlphaBetaPruningMrXTreeNode childNode : childNodes) {
+                NoAlphaBetaPruningMrXTreeNode evaluatedNode = childNode.minimax(depth - 1, alpha, beta, false, maxNodes);
+                if (evaluatedNode.score > maxEval) {
+                    maxEval = evaluatedNode.score;
+                    maxNode = childNode;
+                    maxNode.score = maxEval;
+                }
+            }
+            return maxNode;
+        } else { // Detectives want to minimise the score
+            int minEval = Integer.MAX_VALUE;
+            NoAlphaBetaPruningMrXTreeNode minNode = childNodes.get(0);
+            for (NoAlphaBetaPruningMrXTreeNode childNode : childNodes) {
+                NoAlphaBetaPruningMrXTreeNode evaluatedNode = childNode.minimax(depth - 1, alpha, beta, true, maxNodes);
+                if (evaluatedNode.score < minEval) {
+                    minEval = evaluatedNode.score;
+                    minNode = childNode;
+                    minNode.score = minEval;
+                }
+            }
+            return minNode;
+        }
     }
 
+    public List<Move> bestMoves(int depth, int maxNodes) {
+        return minimax(depth, Integer.MIN_VALUE, Integer.MAX_VALUE, true, maxNodes).moves;
+    }
 }
