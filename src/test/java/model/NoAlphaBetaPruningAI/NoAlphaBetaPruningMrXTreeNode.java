@@ -1,10 +1,11 @@
-package uk.ac.bris.cs.scotlandyard.ui.ai.model.TreeNode;
+package model.NoAlphaBetaPruningAI;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.graph.ImmutableValueGraph;
 import uk.ac.bris.cs.scotlandyard.model.*;
-        import uk.ac.bris.cs.scotlandyard.ui.ai.model.util.GraphHelper.GraphHelper;
+import uk.ac.bris.cs.scotlandyard.ui.ai.model.TreeNode.ScoreConstants;
+import uk.ac.bris.cs.scotlandyard.ui.ai.model.util.GraphHelper.GraphHelper;
 import uk.ac.bris.cs.scotlandyard.ui.ai.model.util.GraphHelper.RegularGraphHelper;
 import uk.ac.bris.cs.scotlandyard.ui.ai.model.util.GraphHelper.WeightedGraphHelper;
 
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/*-------------FOR TESTING PURPOSES ONLY (please don't mark the structure)-------------*/
 public class NoAlphaBetaPruningMrXTreeNode {
     protected Board.GameState gameState; // Current GameState
     protected List<Move> moves; // Move that was made to obtain current GameState

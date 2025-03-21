@@ -4,14 +4,11 @@ import io.atlassian.fugue.Pair;
 import uk.ac.bris.cs.scotlandyard.model.Ai;
 import uk.ac.bris.cs.scotlandyard.model.Board;
 import uk.ac.bris.cs.scotlandyard.model.Move;
-import uk.ac.bris.cs.scotlandyard.ui.ai.model.Factory.MrXNodeFactory;
-import uk.ac.bris.cs.scotlandyard.ui.ai.model.Factory.TreeNodeFactory;
-import uk.ac.bris.cs.scotlandyard.ui.ai.model.TreeNode.GameTreeNode;
-import uk.ac.bris.cs.scotlandyard.ui.ai.model.TreeNode.NoAlphaBetaPruningMrXTreeNode;
 
 import javax.annotation.Nonnull;
 import java.util.concurrent.TimeUnit;
 
+/*-------------FOR TESTING PURPOSES ONLY (please don't mark the structure)-------------*/
 public class NoAlphaBetaPruningMrXAI implements Ai {
 
     @Nonnull

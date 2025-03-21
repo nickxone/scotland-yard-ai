@@ -1,16 +1,9 @@
 package model.NoAlphaBetaPruningAI;
 
 import uk.ac.bris.cs.scotlandyard.model.Board;
-import uk.ac.bris.cs.scotlandyard.model.LogEntry;
 import uk.ac.bris.cs.scotlandyard.ui.ai.model.AIGameState.AIGameStateFactory;
-import uk.ac.bris.cs.scotlandyard.ui.ai.model.Factory.TreeNodeFactory;
-import uk.ac.bris.cs.scotlandyard.ui.ai.model.TreeNode.DetectiveTreeNode;
-import uk.ac.bris.cs.scotlandyard.ui.ai.model.TreeNode.GameTreeNode;
-import uk.ac.bris.cs.scotlandyard.ui.ai.model.TreeNode.MrXTreeNode;
-import uk.ac.bris.cs.scotlandyard.ui.ai.model.TreeNode.NoAlphaBetaPruningMrXTreeNode;
 
-import java.util.List;
-
+/*-------------FOR TESTING PURPOSES ONLY (please don't mark the structure)-------------*/
 public class NoAlphaBetaPruningMrXTreeNodeFactory {
 
     public NoAlphaBetaPruningMrXTreeNode createRoot(Board board) {
