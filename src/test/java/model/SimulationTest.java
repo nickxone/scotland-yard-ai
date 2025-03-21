@@ -60,17 +60,17 @@ public class SimulationTest {
     }
 
     @Test
-    public void BenchMark() {
+    public void mrXvsDetectiveFirstSimulation() {
         MrXAI aiRecursive = new MrXAI();
         DetectivesAI detectivesAI = new DetectivesAI();
         detectivesAI.onStart();
         MyGameStateFactory myGameStateFactory = new MyGameStateFactory();
-        var mrX = new Player(MRX, defaultMrXTickets(), 104);
-        var red = new Player(RED, defaultDetectiveTickets(), 67);
-        var green = new Player(GREEN, defaultDetectiveTickets(), 94);
-        var blue = new Player(BLUE, defaultDetectiveTickets(), 141);
-        var white = new Player(WHITE, defaultDetectiveTickets(), 155);
-        var yellow = new Player(YELLOW, defaultDetectiveTickets(), 112);
+        var mrX = new Player(MRX, defaultMrXTickets(), 78);
+        var red = new Player(RED, defaultDetectiveTickets(), 112);
+        var green = new Player(GREEN, defaultDetectiveTickets(), 117);
+        var blue = new Player(BLUE, defaultDetectiveTickets(), 26);
+        var white = new Player(WHITE, defaultDetectiveTickets(), 50);
+        var yellow = new Player(YELLOW, defaultDetectiveTickets(), 94);
 
         Board.GameState state = myGameStateFactory.build(new GameSetup(defaultGraph, STANDARD24MOVES), mrX, blue, red, white, green, yellow);
 
@@ -79,14 +79,80 @@ public class SimulationTest {
         while (state.getWinner().isEmpty()) {
             Move mr1AiMove = aiRecursive.pickMove(state, pair);
             state = state.advance(mr1AiMove);
+            System.out.println("MrX = move" + mr1AiMove);
 
             while (state.getWinner().isEmpty() && !state.getAvailableMoves().stream().findFirst().get().commencedBy().isMrX()) {
                 Move detectiveAI = detectivesAI.pickMove(state, pair);
-                System.out.println(state.getAvailableMoves());
+                System.out.println("Detective move= " + detectiveAI);
                 state = state.advance(detectiveAI);
             }
         }
+        System.out.println(state.getWinner());
+        assertThat(!state.getWinner().isEmpty()).isTrue(); // check that there is a winner at the end of the game
 
+    }
+    @Test
+    public void mrXvsDetectiveSecondSimulation() {
+        MrXAI aiRecursive = new MrXAI();
+        DetectivesAI detectivesAI = new DetectivesAI();
+        detectivesAI.onStart();
+        MyGameStateFactory myGameStateFactory = new MyGameStateFactory();
+        var mrX = new Player(MRX, defaultMrXTickets(), 47);
+        var red = new Player(RED, defaultDetectiveTickets(), 123);
+        var green = new Player(GREEN, defaultDetectiveTickets(), 155);
+        var blue = new Player(BLUE, defaultDetectiveTickets(), 112);
+        var white = new Player(WHITE, defaultDetectiveTickets(), 29);
+        var yellow = new Player(YELLOW, defaultDetectiveTickets(), 35);
+
+        Board.GameState state = myGameStateFactory.build(new GameSetup(defaultGraph, STANDARD24MOVES), mrX, blue, red, white, green, yellow);
+
+        Pair<Long, TimeUnit> pair = new Pair<>(1500L, TimeUnit.MINUTES);
+
+        while (state.getWinner().isEmpty()) {
+            Move mr1AiMove = aiRecursive.pickMove(state, pair);
+            state = state.advance(mr1AiMove);
+            System.out.println("MrX = move" + mr1AiMove);
+
+            while (state.getWinner().isEmpty() && !state.getAvailableMoves().stream().findFirst().get().commencedBy().isMrX()) {
+                Move detectiveAI = detectivesAI.pickMove(state, pair);
+                System.out.println("Detective move= " + detectiveAI);
+                state = state.advance(detectiveAI);
+            }
+        }
+        System.out.println(state.getWinner());
+        assertThat(!state.getWinner().isEmpty()).isTrue(); // check that there is a winner at the end of the game
+
+    }
+
+    @Test
+    public void mrXvsDetectiveThirdSimulation() {
+        MrXAI aiRecursive = new MrXAI();
+        DetectivesAI detectivesAI = new DetectivesAI();
+        detectivesAI.onStart();
+        MyGameStateFactory myGameStateFactory = new MyGameStateFactory();
+        var mrX = new Player(MRX, defaultMrXTickets(), 78);
+        var red = new Player(RED, defaultDetectiveTickets(), 112);
+        var green = new Player(GREEN, defaultDetectiveTickets(), 117);
+        var blue = new Player(BLUE, defaultDetectiveTickets(), 26);
+        var white = new Player(WHITE, defaultDetectiveTickets(), 50);
+        var yellow = new Player(YELLOW, defaultDetectiveTickets(), 94);
+
+        Board.GameState state = myGameStateFactory.build(new GameSetup(defaultGraph, STANDARD24MOVES), mrX, blue, red, white, green, yellow);
+
+        Pair<Long, TimeUnit> pair = new Pair<>(1500L, TimeUnit.MINUTES);
+
+        while (state.getWinner().isEmpty()) {
+            Move mr1AiMove = aiRecursive.pickMove(state, pair);
+            state = state.advance(mr1AiMove);
+            System.out.println("MrX = move" + mr1AiMove);
+
+            while (state.getWinner().isEmpty() && !state.getAvailableMoves().stream().findFirst().get().commencedBy().isMrX()) {
+                Move detectiveAI = detectivesAI.pickMove(state, pair);
+                System.out.println("Detective move= " + detectiveAI);
+                state = state.advance(detectiveAI);
+            }
+        }
+        System.out.println(state.getWinner());
         assertThat(!state.getWinner().isEmpty()).isTrue(); // check that there is a winner at the end of the game
 
     }
