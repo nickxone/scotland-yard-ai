@@ -8,6 +8,8 @@ import org.junit.runners.Suite;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-		TestForAIs.class
+		GraphHelperTest.class,
+		BenchMark.class,
+		PickMoveAITest.class
 })
 public class AllTest {}
