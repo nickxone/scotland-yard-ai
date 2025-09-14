@@ -1,33 +1,62 @@
-# cw-model
-In the first part of the coursework, the factory method `build()` of the `Factory<GameState>` interface has been implemented to create instances of the `GameState`. The `GameState` interface was implemented by `MyGameState`, which is an inner class of `MyGameStateFactory`. 
+# Scotland Yard AI
+AI agents for the **Scotland Yard** board game:
+- `DetectivesAI` – plays as the detectives trying to catch MrX  
+- `MrXAI` – plays as MrX, attempting to avoid capture  
 
-The `advance()` method of the `MyGameState` was implemented using an anonymous class for the Visitor Pattern with `visit(SingleMove)` and `visit(DoubleMove)` methods. The Visitor pattern uses double dispatch to select the correct method based on both the visitor and the visited element. Effectively, `Visit(...)` methods return the new `GameState` after advancing the current one with the specific `Move` provided.
+The core decision-making is powered by a **game tree search** with **MiniMax** and **Alpha-Beta pruning**, optimised for efficiency and scalability.  
 
-In the `MyModelFactory`, the factory method `build()` of the `Factory<Model>` interface was implemented to create an anonymous class, which implements the `Model` interface. The anonymous class follows the observer pattern. It stores `GameState` and Set of Observers. We can add and remove observers with `registerObserver` or `unregisterObserver` methods, respectively. The `chooseMove()` method is used to notify all observers that either the `GAMEOVER` or `MADEMOVE` event happened by calling the `onModelChanged()` method.
-# cw-ai (no downcast)
-For the second part of the coursework, `DetectivesAI` and `MrXAI` were created.
-The AI decision-making algorithm is based on the tree, which is obtained by simulating possible states of the given board that might happen in the future. Each node in that tree contains the following information:
-- **Game State** (specifically, `Board.GameState`)
-- **Moves** correspond to the moves (for detectives) or single move (for MrX) that led to the current state (moves don't exist for the root node, since it was provided to AI rather than simulated by the algorithm)
-- **Location of MrX** (exact location, if it's a MrX AI, and predicted in case of Detectives AI)
-- **Score** of the current node (the higher the score is, the better the current node is for MrX. It's based on several factors, including the distance to all detectives – computed using Dijkstra's algorithm, appropriate usage of double and secret tickets, the number of tickets left, etc.)
+> [!IMPORTANT]
+> This project was submitted as the final assignment for COMS10018: Object Oriented Programming and Algorithms module. The code should not be copied. 
 
+---
 
-It's worth noting that the **score** of each node is computed when it's created, but the only nodes that have a score that doesn't change are the bottom ones since running the ***MiniMax*** algorithm "propagates" those values to the top (and therefore, reassigns scores for the nodes above). Nevertheless, it is still very useful to precompute the node's score anyway since it is utilised for another optimisation: It is extremely unlikely that the move that seems to be the least appealing would correspond to a winning position in future. Therefore, such moves can be discarded, and methods that generate child nodes (i.e., `computeMrXNodes` and `computeDetectivesNodes`) should output up to `maxNodes` nodes that seem to be the most important ones to consider.
+## How It Works  
 
-To improve efficiency, rather than pre-generating the tree, the algorithm computes all the required nodes while traversing it. The intuition behind it is that the optimisation technique used (specifically, ***Alpha-Beta pruning***) allows for skipping some nodes (and even subtrees) that the original version of ***MiniMax*** (the algorithm which is used to make an optimal decision for a player) wouldn't. The recursive nature of ***MiniMax*** also hints that it is possible to compute child nodes for a specific node while running the algorithm itself and then call ***MiniMax*** for them, avoiding the need to store child nodes for each node as a separate attribute.
-Summarising the above, this allows us to save time not only by **not** pre-generating the tree but also by not even computing all the tree nodes and yet obtaining the same result as if we did compute the whole tree in the first place.
-### Project structure
-The general structure of the project is the following: `DetectivesAI` and `MrXAI` both rely on the tree that can be represented by `DetectiveTree` and `MrXTreeNode`, respectively. `DetectiveTree` and `MrXTreeNode` inherit from an abstract class `GameTreeNode` that implements common methods such as `computeMrXNodes` and `computeDetectivesNodes`. It also contains an implementation for a `computeScore` method and an abstract function `bestMoves` that must be implemented by its child classes so that AI can easily access the best moves (or move, in the case of MrX) it should do when `pickMove` is called.
-### Note on the `AIGameState` (implements `GameState`)
-For the AI, **no downcast** version is used, and since only the `Board` is passed to AI when `pickMove` is called, `GameState` should be created to access its functionality. During the development of AI for detectives, I encountered several problems when using `GameState` created by `MyGameStateFactory`, which is provided by default. I was able to reach the desired functionality by revisiting the code from the first part of the coursework and changing the logic slightly, as well as the `build` method. So, instead of a pure `MyGameState` (created in the first part of the coursework), `AIGameState` is used (modified version).
-### Patterns used
-***Abstract Factory*** is used to build nodes of type `GameTreeNode`: `DetectivesNodeFactory` produces `DetectiveTreeNode`, and `MrXNodeFactory` produces `MrXTreeNode`. Both factories implement the abstract class `TreeNodeFactory`, which forces its children to implement the `createRoot` method. Since the new tree is constructed each time `pickMove` is called, this justifies the usage of the pattern.
-***Strategy Pattern*** is used to be able to use different graph helpers. It was useful during the development of the scoring function since I wanted to be able to swap different graph helpers easily, so it was done by creating a new `GraphHelper` interface.
-### Tests
-Alpha-Beta pruning is tested as follows: the actual AI is tested against an AI without Alpha-Beta pruning, which is created solely for testing purposes. If they always pick the same move, that implies that AI with Alpha-Beta pruning makes exactly the same decisions but more efficiently.
-To check that both MrX and Detectives AI work, different Scotland Yard games are simulated where MrX AI plays against Detectives AI.
-It is also worth mentioning that on my machine, within the default time given for MrX, it was able to compute the tree that consisted of up to approximately 40000 nodes (that includes the nodes that were discarded by Alpha-Beta pruning) and make a decision.
+The AI explores possible future game states using a tree structure. Each node contains:  
+- **Game State** (`Board.GameState`)  
+- **Moves** leading to that state  
+- **MrX’s Location** (exact for MrX AI, predicted for Detective AI)  
+- **Score** evaluating how favourable the state is for MrX (higher = better)  
 
-### Future Improvements
-Given the time constraint, the main focus was on the structure of the project. The major improvement that could change the performance of MrX and the detectives significantly is changing the constants used by the score function. It should be done by observing the decisions made by an AI, which we didn't have time to do. To change the constants easily and see what they correspond to, a separate class, ScoreConstants, exists. 
+### Scoring  
+The score function considers:  
+- Distance from detectives (via **Dijkstra’s algorithm**)  
+- Ticket availability and usage (including double/secret tickets)  
+- Remaining moves  
+
+Scores are precomputed on node creation and later refined through **MiniMax** propagation.  
+Low-scoring branches are pruned early to save computation.  
+
+### Optimisation  
+- **On-demand node expansion** – nodes are generated during traversal, not upfront  
+- **Alpha-Beta pruning** – skips entire subtrees that cannot affect the final outcome  
+- **Result**: ~40,000 nodes can be evaluated within the game’s default time limits on a standard machine  
+---
+## Project Structure  
+- `GameTreeNode` – abstract base class (shared logic: scoring, move generation)  
+- `DetectiveTreeNode` / `MrXTreeNode` – role-specific implementations  
+- `DetectivesAI` / `MrXAI` – main AI entry points  
+- `TreeNodeFactory` – abstract factory for creating nodes  
+  - `DetectivesNodeFactory` → `DetectiveTreeNode`  
+  - `MrXNodeFactory` → `MrXTreeNode`  
+---
+## Design Patterns  
+- **Abstract Factory** – construct tree nodes consistently per role  
+- **Strategy Pattern** – swap graph helpers easily for scoring experiments  
+---
+## Testing  
+- **Alpha-Beta Pruning**: compared against a MiniMax-only AI → identical moves, but with fewer computations  
+- **Simulation**: MrX AI vs. Detectives AI across multiple games to validate play quality  
+--- 
+## Getting Started  
+
+1. Clone the repository:  
+   ```bash
+   git clone https://github.com/nickxone/scotland-yard-ai.git
+   cd scotland-yard-ai
+   ```
+2. Run the game:
+    ```bash
+    ./mvnw clean compile exec:java 
+    ```
+
