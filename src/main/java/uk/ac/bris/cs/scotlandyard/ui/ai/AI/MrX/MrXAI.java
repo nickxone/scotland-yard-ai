@@ -26,7 +26,7 @@ public class MrXAI implements Ai {
     public Move pickMove(@Nonnull Board board, Pair<Long, TimeUnit> timeoutPair) {
         TreeNodeFactory MrXNodeFactory = new MrXNodeFactory();
         GameTreeNode root = MrXNodeFactory.createRoot(board);
-        return root.bestMoves(3, 6).get(0);
+        return root.bestMoves(4, 5).get(0);
     }
 
 }

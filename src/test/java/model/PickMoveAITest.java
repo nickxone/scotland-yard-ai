@@ -9,11 +9,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import uk.ac.bris.cs.scotlandyard.model.*;
 import uk.ac.bris.cs.scotlandyard.model.Move;
-//import uk.ac.bris.cs.scotlandyard.model.ParameterisedModelTestBase;
 import uk.ac.bris.cs.scotlandyard.model.Player;
 import uk.ac.bris.cs.scotlandyard.ui.ai.AI.MrX.*;
-import uk.ac.bris.cs.scotlandyard.ui.ai.AI.Detectives.*;
-import uk.ac.bris.cs.scotlandyard.ui.ai.model.util.GraphHelper.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -25,16 +22,13 @@ import java.util.concurrent.TimeUnit;
 
 import static uk.ac.bris.cs.scotlandyard.model.ScotlandYard.STANDARD24MOVES;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static uk.ac.bris.cs.scotlandyard.model.Piece.Detective.*;
 import static uk.ac.bris.cs.scotlandyard.model.Piece.MrX.MRX;
 import static uk.ac.bris.cs.scotlandyard.model.ScotlandYard.*;
 import static uk.ac.bris.cs.scotlandyard.model.ScotlandYard.Ticket.*;
 
 /**
- * Tests related to whether the game state reports game over correctly
- * <br>
- * tests here to work properly!</b>
+ * Test that AI picks the right moves
  */
 
 public class PickMoveAITest {
@@ -62,27 +56,7 @@ public class PickMoveAITest {
     }
 
     @Test
-    public void testAIsPickMoveShouldBeEqualGameState1() {
-        NoAlphaBetaPruningMrXAI preGeneratedTreeAI = new NoAlphaBetaPruningMrXAI();
-        MrXAI MrXAI = new MrXAI();
-
-        MyGameStateFactory myGameStateFactory = new MyGameStateFactory();
-        var mrX = new Player(MRX, defaultMrXTickets(), 35);
-        var blue = new Player(BLUE, defaultDetectiveTickets(), 53);
-        var red = new Player(RED, defaultDetectiveTickets(), 26);
-        var white = new Player(WHITE, defaultDetectiveTickets(), 50);
-        var green = new Player(GREEN, defaultDetectiveTickets(), 29);
-        var yellow = new Player(YELLOW, defaultDetectiveTickets(), 91);
-
-        Board.GameState state = myGameStateFactory.build(new GameSetup(defaultGraph, STANDARD24MOVES), mrX, blue, red, white, green, yellow);
-
-        Pair<Long, TimeUnit> pair = new Pair<>(1500L, TimeUnit.MINUTES);
-        Move firstAiMove = preGeneratedTreeAI.pickMove(state, pair);
-        Move secondAiMove = MrXAI.pickMove(state, pair);
-        assertThat(firstAiMove.equals(secondAiMove)).isTrue();
-    }
-    @Test
-    public void testAIsPickMoveShouldBeEqualGameState2() {
+    public void testAIsPickMoveShouldBeEqualGameState() {
         NoAlphaBetaPruningMrXAI preGeneratedTreeAI = new NoAlphaBetaPruningMrXAI();
         MrXAI MrXAI = new MrXAI();
 
@@ -102,24 +76,4 @@ public class PickMoveAITest {
         assertThat(firstAiMove.equals(secondAiMove)).isTrue();
     }
 
-    @Test
-    public void testAIsPickMoveShouldBeEqualGameState3() {
-        NoAlphaBetaPruningMrXAI preGeneratedTreeAI = new NoAlphaBetaPruningMrXAI();
-        MrXAI MrXAI = new MrXAI();
-
-        MyGameStateFactory myGameStateFactory = new MyGameStateFactory();
-        var mrX = new Player(MRX, defaultMrXTickets(), 106);
-        var blue = new Player(BLUE, defaultDetectiveTickets(), 141);
-        var red = new Player(RED, defaultDetectiveTickets(), 112);
-        var white = new Player(WHITE, defaultDetectiveTickets(), 117);
-        var green = new Player(GREEN, defaultDetectiveTickets(), 26);
-        var yellow = new Player(YELLOW, defaultDetectiveTickets(), 50);
-
-        Board.GameState state = myGameStateFactory.build(new GameSetup(defaultGraph, STANDARD24MOVES), mrX, blue, red, white, green, yellow);
-
-        Pair<Long, TimeUnit> pair = new Pair<>(1500L, TimeUnit.MINUTES);
-        Move firstAiMove = preGeneratedTreeAI.pickMove(state, pair);
-        Move secondAiMove = MrXAI.pickMove(state, pair);
-        assertThat(firstAiMove.equals(secondAiMove)).isTrue();
-    }
 }

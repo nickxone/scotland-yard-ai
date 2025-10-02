@@ -8,7 +8,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import uk.ac.bris.cs.scotlandyard.model.*;
 import uk.ac.bris.cs.scotlandyard.model.Move;
-//import uk.ac.bris.cs.scotlandyard.model.ParameterisedModelTestBase;
 import uk.ac.bris.cs.scotlandyard.model.Player;
 import uk.ac.bris.cs.scotlandyard.ui.ai.AI.MrX.*;
 import uk.ac.bris.cs.scotlandyard.ui.ai.AI.Detectives.*;
@@ -23,16 +22,13 @@ import java.util.concurrent.TimeUnit;
 
 import static uk.ac.bris.cs.scotlandyard.model.ScotlandYard.STANDARD24MOVES;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static uk.ac.bris.cs.scotlandyard.model.Piece.Detective.*;
 import static uk.ac.bris.cs.scotlandyard.model.Piece.MrX.MRX;
 import static uk.ac.bris.cs.scotlandyard.model.ScotlandYard.*;
 import static uk.ac.bris.cs.scotlandyard.model.ScotlandYard.Ticket.*;
 
 /**
- * Tests related to whether the game state reports game over correctly
- * <br>
- * tests here to work properly!</b>
+ * Run the game simulation
  */
 
 public class SimulationTest {
@@ -91,6 +87,7 @@ public class SimulationTest {
         assertThat(!state.getWinner().isEmpty()).isTrue(); // check that there is a winner at the end of the game
 
     }
+
     @Test
     public void mrXvsDetectiveSecondSimulation() {
         MrXAI aiRecursive = new MrXAI();

@@ -4,37 +4,26 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.graph.ImmutableValueGraph;
 import com.google.common.io.Resources;
-import model.NoAlphaBetaPruningAI.NoAlphaBetaPruningMrXAI;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import uk.ac.bris.cs.scotlandyard.model.*;
-import uk.ac.bris.cs.scotlandyard.model.Move;
-//import uk.ac.bris.cs.scotlandyard.model.ParameterisedModelTestBase;
 import uk.ac.bris.cs.scotlandyard.model.Player;
-import uk.ac.bris.cs.scotlandyard.ui.ai.AI.MrX.*;
-import uk.ac.bris.cs.scotlandyard.ui.ai.AI.Detectives.*;
 import uk.ac.bris.cs.scotlandyard.ui.ai.model.util.GraphHelper.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.atlassian.fugue.Pair;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.TimeUnit;
 
 import static uk.ac.bris.cs.scotlandyard.model.ScotlandYard.STANDARD24MOVES;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static uk.ac.bris.cs.scotlandyard.model.Piece.Detective.*;
 import static uk.ac.bris.cs.scotlandyard.model.Piece.MrX.MRX;
 import static uk.ac.bris.cs.scotlandyard.model.ScotlandYard.*;
 import static uk.ac.bris.cs.scotlandyard.model.ScotlandYard.Ticket.*;
 
 /**
- * Tests related to whether the game state reports game over correctly
- * <br>
- * tests here to work properly!</b>
+ * Test GraphHelper
  */
 
 public class GraphHelperTest {
@@ -75,7 +64,7 @@ public class GraphHelperTest {
 
         GraphHelper graphHelper = new RegularGraphHelper();
 
-        int [] resGraph = graphHelper.computeDistance(state.getSetup().graph,114);
+        int[] resGraph = graphHelper.computeDistance(state.getSetup().graph, 114);
 
         assertThat(resGraph[1] == 6).isTrue();
         assertThat(resGraph[2] == 6).isTrue();
@@ -89,8 +78,7 @@ public class GraphHelperTest {
         assertThat(resGraph[14] == 5).isTrue();
 
     }
-
-
+    
     @Test
     public void checkWeightedGraphHelperOnExpectedValues() {
         MyGameStateFactory myGameStateFactory = new MyGameStateFactory();
@@ -105,9 +93,7 @@ public class GraphHelperTest {
 
         WeightedGraphHelper weightedGraphHelper = new WeightedGraphHelper();
 
-        int [] resWeight= weightedGraphHelper.computeDistance(state.getSetup().graph,114);
-
-        System.out.println(resWeight[1]+ " " + resWeight[2]+ " " + resWeight[3]+ " " + resWeight[4]+ " " + resWeight[5]+ " " + resWeight[6]+ " " + resWeight[10]+ " " + resWeight[13]+ " " + resWeight[14]);
+        int[] resWeight = weightedGraphHelper.computeDistance(state.getSetup().graph, 114);
 
         assertThat(resWeight[1] == 9).isTrue();
         assertThat(resWeight[2] == 8).isTrue();
